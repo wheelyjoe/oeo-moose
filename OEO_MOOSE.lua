@@ -124,13 +124,13 @@
   
   -- Squadron CAP Intervals -- 
 
-  A2ADispatcherRed:SetSquadronCapInterval( "TAB 1", 1, 240, 20, 1 )
-  A2ADispatcherRed:SetSquadronCapInterval( "TAB 2", 1, 240, 20, 1 )
-  A2ADispatcherRed:SetSquadronCapInterval( "TAB 3", 1, 120, 20, 1 )
-  A2ADispatcherRed:SetSquadronCapInterval( "TAB 4", 1, 240, 20, 1 )
-  A2ADispatcherRed:SetSquadronCapInterval( "TAB 5", 1, 60, 20, 1 )
-  A2ADispatcherRed:SetSquadronCapInterval( "TAB 6", 1, 60, 20, 1 )
-  A2ADispatcherRed:SetSquadronCapInterval( "TAB 7", 1, 120, 20, 1 )
+  A2ADispatcherRed:SetSquadronCapInterval( "TAB 1", 1, 240, 720, 1 )
+  A2ADispatcherRed:SetSquadronCapInterval( "TAB 2", 1, 240, 720, 1 )
+  A2ADispatcherRed:SetSquadronCapInterval( "TAB 3", 1, 120, 240, 1 )
+  A2ADispatcherRed:SetSquadronCapInterval( "TAB 4", 1, 240, 720, 1 )
+  A2ADispatcherRed:SetSquadronCapInterval( "TAB 5", 1, 60, 180, 1 )
+  A2ADispatcherRed:SetSquadronCapInterval( "TAB 6", 1, 60, 180, 1 )
+  A2ADispatcherRed:SetSquadronCapInterval( "TAB 7", 1, 120, 240, 1 )
   
   
   -- Setup Squadron GCI -- 
