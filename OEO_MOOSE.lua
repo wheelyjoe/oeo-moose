@@ -1,8 +1,7 @@
 
  -- MOOSE SETUP FOR OPERATION ENDURING ODYSSEY --
- 
- 
   
+ 
   -- Declare Cap + Engage Zones --
  
   TAB1_CAP = ZONE_POLYGON:New( "TAB 1 CAP", GROUP:FindByName( "TAB 1 CAP"))
@@ -56,7 +55,7 @@
   A2ADispatcherRed:SetGciRadius( 200000 )
   
   
--- Setup Squadrons -- 
+  -- Setup Squadrons -- 
  
   A2ADispatcherRed:SetSquadron("TAB 1", AIRBASE.PersianGulf.Bandar_e_Jask_airfield, { "Iran MiG-21 Sqn" }, 30 )
   A2ADispatcherRed:SetSquadron("TAB 2", AIRBASE.PersianGulf.Havadarya, { "Iran F-4E Sqn"}, 30 )
@@ -67,7 +66,7 @@
   A2ADispatcherRed:SetSquadron("TAB 7", AIRBASE.PersianGulf.Lar_Airbase, { "Iran Mig-29A Sqn"}, 15 )
  
 
--- Squadron Overhead Settings -- 
+  -- Squadron Overhead Settings -- 
 
   A2ADispatcherRed:SetSquadronOverhead( "TAB 1", 1 )
   A2ADispatcherRed:SetSquadronOverhead( "TAB 2", 1 )
@@ -78,7 +77,7 @@
   A2ADispatcherRed:SetSquadronOverhead( "TAB 7", 1 )
   
   
--- Squadron Grouping Settings -- 
+  -- Squadron Grouping Settings -- 
 
   A2ADispatcherRed:SetSquadronGrouping( "TAB 1", 2 )
   A2ADispatcherRed:SetSquadronGrouping( "TAB 2", 2 )
@@ -89,7 +88,7 @@
   A2ADispatcherRed:SetSquadronGrouping( "TAB 7", 2 )
   
   
--- Squadron Takeoff Settings -- 
+  -- Squadron Takeoff Settings -- 
 
   A2ADispatcherRed:SetSquadronTakeoffInAir( "TAB 1" )
   A2ADispatcherRed:SetSquadronTakeoffInAir( "TAB 2" )
@@ -100,7 +99,7 @@
   A2ADispatcherRed:SetSquadronTakeoffInAirAltitude( "TAB 7", 7000 )
   
   
--- Squadron Landing Settings --
+  -- Squadron Landing Settings --
 
   A2ADispatcherRed:SetSquadronLandingAtRunway( "TAB 1" )
   A2ADispatcherRed:SetSquadronLandingAtRunway( "TAB 2" )
@@ -123,18 +122,18 @@
   A2ADispatcherRed:SetSquadronCap( "TAB 7", TAB7_CAP, 7315, 9753, 555, 740, 740, 1800, "BARO" )
   
   
--- Squadron CAP Intervals -- 
+  -- Squadron CAP Intervals -- 
 
-  A2ADispatcherRed:SetSquadronCapInterval( "TAB 1", 1, 300, 720, 1 )
-  A2ADispatcherRed:SetSquadronCapInterval( "TAB 2", 1, 300, 720, 1 )
-  A2ADispatcherRed:SetSquadronCapInterval( "TAB 3", 1, 120, 240, 1 )
-  A2ADispatcherRed:SetSquadronCapInterval( "TAB 4", 1, 300, 720, 1 )
-  A2ADispatcherRed:SetSquadronCapInterval( "TAB 5", 1, 120, 240, 1 )
-  A2ADispatcherRed:SetSquadronCapInterval( "TAB 6", 1, 120, 240, 1 )
-  A2ADispatcherRed:SetSquadronCapInterval( "TAB 7", 1, 120, 240, 1 )
+  A2ADispatcherRed:SetSquadronCapInterval( "TAB 1", 1, 240, 20, 1 )
+  A2ADispatcherRed:SetSquadronCapInterval( "TAB 2", 1, 240, 20, 1 )
+  A2ADispatcherRed:SetSquadronCapInterval( "TAB 3", 1, 120, 20, 1 )
+  A2ADispatcherRed:SetSquadronCapInterval( "TAB 4", 1, 240, 20, 1 )
+  A2ADispatcherRed:SetSquadronCapInterval( "TAB 5", 1, 60, 20, 1 )
+  A2ADispatcherRed:SetSquadronCapInterval( "TAB 6", 1, 60, 20, 1 )
+  A2ADispatcherRed:SetSquadronCapInterval( "TAB 7", 1, 120, 20, 1 )
   
   
--- Setup Squadron GCI -- 
+  -- Setup Squadron GCI -- 
 
   A2ADispatcherRed:SetSquadronGci( "TAB 1", 800, 1800 )
   A2ADispatcherRed:SetSquadronGci( "TAB 2", 800, 1800 )
@@ -145,7 +144,7 @@
   A2ADispatcherRed:SetSquadronGci( "TAB 7", 800, 1800 )
   
   
--- Squadron Refuelling Setup --
+  -- Squadron Refuelling Setup --
 
   --A2ADispatcher:SetDefaultTanker ( "TankerEast" )
   A2ADispatcherRed:SetSquadronTanker( "TAB 3", "TankerWest" )
@@ -154,13 +153,48 @@
   A2ADispatcherRed:SetSquadronTanker( "TAB 6", "TankerEast" )
   
 
--- Turn Dispatchers On --
+  -- Turn Dispatchers On --
 
   A2ADispatcherRed:Start()
-  
-  
-  
+    
 
--- Turn Tac Displays On/Off --
-   A2ADispatcherRed:SetTacticalDisplay( true )
+  -- Turn Tac Displays On/Off --
+  A2ADispatcherRed:SetTacticalDisplay( false )
+   
+   
+  -- Random Air Traffic Settings --
+ 
+  local C17=RAT:New("RAT_C17", "NATO Transport")
+  C17:SetDeparture("Al Dhafra AB", "Fujairah Intl")
+  C17:SetDestination("Fujairah Intl", "Al Dhafra AB")
+  C17:Spawn(2)
+  C17:SetSpawnInterval(60)
+  C17:Commute()
+  C17:ATC_Messages(false)
+  
+  local C130=RAT:New("RAT_C130", "NATO Troop Transport")
+  C130:SetDeparture("Al Ain International Airport", "Ras AL Khaimah")
+  C130:SetDestination("Ras Al Khaimah", "Al Ain International Airport")
+  C130:SetSpawnInterval(60)
+  C130:Commute()
+  C130:Spawn(2)
+  C130:ATC_Messages(false)
+  
+  local Chinook=RAT:New("RAT_Chinook", "NATO Chinook")
+  Chinook:SetCoalition("sameonly")
+  Chinook:SetTerminalType(AIRBASE.TerminalType.HelicopterOnly)
+  Chinook:SetTakeoffAir()
+  Chinook:SetSpawnInterval(120)
+  Chinook:ExcludedAirports("Fujairah Intl")
+  Chinook:Spawn(1)
+  Chinook:ATC_Messages(false)
+  
+  local UH60=RAT:New("RAT_UH60", "NATO Black Hawk")
+  UH60:SetCoalition("sameonly")
+  UH60:SetTerminalType(AIRBASE.TerminalType.HelicopterOnly)
+  UH60:SetTakeoffAir()
+  UH60:SetSpawnInterval(120)
+  UH60:ExcludedAirports("Fujairah Intl")
+  UH60:Spawn(1)
+  UH60:ATC_Messages(false)
   
