@@ -13,7 +13,8 @@ airbossStennis:SetMarshalRadio(238.500, "AM")
 airbossStennis:SetRecoveryCase(1)
 airbossStennis:SetCarrierControlledArea(50)
 airbossStennis:SetDefaultPlayerSkill("Naval Aviator")
-airbossStennis:SetHandleAIOFF()
+local CarrierIncludeSet = SET_GROUP:New():FilterPrefixes({"StennisRecoveryTanker", "DARKSTAR"}):FilterStart()
+airbossStennis:SetSquadronAI(CarrierIncludeSet)
 
 --AirbossRadioSettings--
 airbossStennis:SetSoundfilesFolder("Airboss Soundfiles/")
@@ -21,7 +22,7 @@ airbossStennis:SetRadioRelayMarshal("MarshalRadioRelay")
 airbossStennis:SetRadioRelayLSO("LSORadioRelay")
 
 --AirbossBehaviourSettings-- 
-airbossStennis:SetInitialMaxAlt(1500)
+airbossStennis:SetInitialMaxAlt(1000)
 airbossStennis:SetAirbossNiceGuy(true)
 airbossStennis:SetMaxSectionSize(4)
 --airbossStennis:SetMaxMarshalStack(6)
@@ -40,7 +41,7 @@ TexacoStennis:SetRadio(128.500)
 airbossStennis:SetRecoveryTanker(TexacoStennis)
 
 --AirbossTrapSheets-- 
-airbossStennis:SetAutoSave()
+--airbossStennis:SetAutoSave()
 
 --Rescue Helo--
 RescueheloStennis=RESCUEHELO:New(UNIT:FindByName("CV-74 Stennis"), "Stennis Rescue Helo")
@@ -70,6 +71,16 @@ atisAlMinhad:SetTACAN(99)
 --atisAlMinhad:AddILS(110.70, "9")
 atisAlMinhad:SetRadioPower(1000)
 atisAlMinhad:Start()
+
+
+
+-- Handle Blue Airborne Assets --
+
+
+
+
+
+
 
 
 
