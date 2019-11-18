@@ -160,7 +160,7 @@ local function track_wpns(timeInterval, time)
                   params =
                   {
                     point = impactPoint,
-                    radius = suppressionRadius*0.35
+                    radius = suppressionRadius*0.25
                   }
                 }
 

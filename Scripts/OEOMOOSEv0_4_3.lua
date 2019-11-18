@@ -13,7 +13,8 @@ airbossStennis:SetMarshalRadio(238.500, "AM")
 airbossStennis:SetRecoveryCase(1)
 airbossStennis:SetCarrierControlledArea(50)
 airbossStennis:SetDefaultPlayerSkill("Naval Aviator")
-local CarrierIncludeSet = SET_GROUP:New():FilterPrefixes({"StennisRecoveryTanker", "DARKSTAR"}):FilterStart()
+local CarrierIncludeSet = SET_GROUP:New():FilterPrefixes({"StennisRecoveryTanker"}):FilterStart()
+--local CarrierIncludeSet = SET_GROUP:New():FilterPrefixes({"StennisRecoveryTanker", "DARKSTAR"}):FilterStart()
 airbossStennis:SetSquadronAI(CarrierIncludeSet)
 
 --AirbossRadioSettings--
@@ -34,11 +35,20 @@ airbossStennis:SetVoiceOversMarshalByFF()
 
 --RecoveryTankerSettings-- 
 TexacoStennis=RECOVERYTANKER:New(UNIT:FindByName("CV-74 Stennis"), "StennisRecoveryTanker")
+TexacoStennis:SetTakeoff(SPAWN.Takeoff.Air)
+TexacoStennis:SetTACAN(16, "TXO")
+TexacoStennis:SetRadio(128.5)
+TexacoStennis:SetRecoveryAirboss(true)
 TexacoStennis:Start()
-TexacoStennis:SetTakeoffAir()
-TexacoStennis:SetTACAN(16, "TKR")
-TexacoStennis:SetRadio(128.500)
 airbossStennis:SetRecoveryTanker(TexacoStennis)
+
+--[[AWACS Settings--
+DarkstarStennis=RECOVERYTANKER:New(UNIT:FindByName("CV-74 Stennis"), "DARKSTAR")
+DarkstarStennis:Start()
+DarkstarStennis:SetTakeoffAir()
+DarkstarStennis:SetAltitude(28000)
+DarkstarStennis:SetRadio(235.000)
+airbossStennis:SetAWACS(DarkstarStennis)]]--
 
 --AirbossTrapSheets-- 
 --airbossStennis:SetAutoSave()
