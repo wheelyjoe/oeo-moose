@@ -88,7 +88,7 @@ function ARCO()
   ARCOSpawner = SPAWN:New("ARCO")
   :InitLimit(1, 0)
   :SpawnScheduled(10, 0)
-  :InitRepeatOnLanding()
+  --:InitRepeatOnLanding()
   :InitCleanUp(10)
   
  end
@@ -97,7 +97,7 @@ function SHELL()
   SHELLSpawner = SPAWN:New("SHELL")
   :InitLimit(1, 0)
   :SpawnScheduled(10, 0)
-  :InitRepeatOnLanding()
+  --:InitRepeatOnLanding()
   :InitCleanUp(10)
   
  end
@@ -106,7 +106,7 @@ function MAGIC()
   MAGICSpawner = SPAWN:New("MAGIC")
   :InitLimit(1, 0)
   :SpawnScheduled(10, 0)
-  :InitRepeatOnLanding()
+  --:InitRepeatOnLanding()
   :InitCleanUp(10)
   
  end
@@ -115,7 +115,7 @@ function DARKSTAR()
   DARKSTARSpawner = SPAWN:New("DARKSTAR")
   :InitLimit(1, 0)
   :SpawnScheduled(10, 0)
-  :InitRepeatOnLanding()
+  --:InitRepeatOnLanding()
   :InitCleanUp(10)
   
 end
@@ -166,7 +166,7 @@ function SQN1()
 		)
 		:InitLimit(4, 0)
 		:SpawnScheduled(360, 0.5)
-		:InitRepeatOnLanding()
+		--:InitRepeatOnLanding()
 		:InitCleanUp(10)
 
 end
@@ -210,7 +210,7 @@ function SQN2()
 		)
 		:InitLimit(2, 0)
 		:SpawnScheduled(360, 0.5)
-		:InitRepeatOnLanding()
+		--:InitRepeatOnLanding()
 		:InitCleanUp(10)
 
 end
@@ -254,7 +254,7 @@ function SQN3()
 		)
 		:InitLimit(2, 0)
 		:SpawnScheduled(30, 0.5)
-		:InitRepeatOnLanding()
+		--:InitRepeatOnLanding()
 		:InitCleanUp(10)
 
 end
@@ -298,7 +298,7 @@ function SQN4()
 		)
 		:InitLimit(2, 0)
 		:SpawnScheduled(30, 0.5)
-		:InitRepeatOnLanding()
+		--:InitRepeatOnLanding()
 		:InitCleanUp(10)
 
 end
@@ -342,7 +342,7 @@ function SQN5()
 		)
 		:InitLimit(4, 0)
 		:SpawnScheduled(360, 0.5)
-		:InitRepeatOnLanding()
+		--:InitRepeatOnLanding()
 		:InitCleanUp(10)
 
 end
@@ -386,7 +386,7 @@ function SQN6()
 		)
 		:InitLimit(2, 0)
 		:SpawnScheduled(360, 0.5)
-		:InitRepeatOnLanding()
+		--:InitRepeatOnLanding()
 		:InitCleanUp(10)
 
 end
@@ -430,7 +430,7 @@ function SQN7()
 		)
 		:InitLimit(2, 0)
 		:SpawnScheduled(360, 0.5)
-		:InitRepeatOnLanding()
+		--:InitRepeatOnLanding()
 		:InitCleanUp(10)
 
 end
@@ -474,7 +474,7 @@ function SQN8()
 		)
 		:InitLimit(2, 0)
 		:SpawnScheduled(360, 0.5)
-		:InitRepeatOnLanding()
+		--:InitRepeatOnLanding()
 		:InitCleanUp(10)
 
 end
