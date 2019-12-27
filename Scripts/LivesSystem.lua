@@ -1,7 +1,7 @@
 -- Operation Enduring Odyssey Lives System --
 
 -- Define Required Variables and Functions --
-LivesRemaining = 300
+LivesRemaining = 500
 LivesAirborne = 0
 LivesLost = 0
 LivesMIA = 0
@@ -71,8 +71,8 @@ function PlayerAWOL()
 end
 
 function PlayerNotAWOL()
-	LivesAWOL = Lives AWOL - 1
-	LivesAirborne = Lives Airborne + 1
+	LivesAWOL = LivesAWOL - 1
+	LivesAirborne = LivesAirborne + 1
 		if LivesAWOL < 0
 			then
 				LivesAWOL = 0
@@ -82,7 +82,7 @@ end
 -- F10 Menu Check Remaning Lives --
 
 function PrintLives()
-	trigger.action.outTextForCoalition(2,"Operation Enduring Odyssey Lives Status \n\nLives Remaining: " ..LivesRemaining.. " \nAirborne Pilots: " ..LivesAirborne.. "\nLives Lost: " ..LivesLost, 10, 1)
+	trigger.action.outTextForCoalition(2,"Operation Enduring Odyssey Lives Status \n\nLives Remaining: " ..LivesRemaining.. " \nAirborne Pilots: " ..LivesAirborne.. "\nPilots MIA: " ..LivesMIA.. "\nLives Lost: " ..LivesLost, 10, 1)
 end
 
 function F10CheckLives()
@@ -165,7 +165,7 @@ function Eject:onEvent(event)
 		then
 			PlayerMIA()
 			local EjectedPilot = event.initiator
-			trigger.action.outTextForCoalition(2, EjectedPilot:getPlayerName().." has ejected. CSAR Available.", 10, 1) -- This line will be removed as Ali's CSAR Script sends the CSAR message.
+			trigger.action.outTextForCoalition(2, EjectedPilot:getPlayerName().." has ejected safely and a CSAR mission is available to rescue them! Use the F10 Menu for more information. (STILL INACTIVE)", 10, 1) -- This line will be removed as Ali's CSAR Script sends the CSAR message.
 			--env.info("EJECT EVENT RUN")
 		end
 end
@@ -194,7 +194,7 @@ function RestartMission()
 end
 
 function MissionFailure:onEvent(event)
-	if event.id == 9 and event.initiator:getPlayerName() ~= nil and LivesLost > 300
+	if event.id == 9 and event.initiator:getPlayerName() ~= nil and LivesLost > 500
 		then
 			trigger.action.outTextForCoalition(2, "The death toll of Operation Enduring Odyssey has soared too high. Public opinion of the Operation has fallen and units are being pulled out of the Persian Gulf. Mission Failed.", 60, 1)
 			timer.scheduleFunction(RestartMission, {}, timer.getTime()+60)
