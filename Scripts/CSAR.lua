@@ -1,4 +1,4 @@
-SpawnPilot = SPAWN:New("GroundedPilot")
+local SpawnPilot = SPAWN:New("GroundedPilot")
 NumberCSARMissions = 0
 CSARPilots = {}
 CSARBeacons = {}
@@ -33,14 +33,15 @@ local function ifFoundCSAR(foundItem, val)
 end      
                                                                                 
   
-local function CSARSearch(pilot)  
+local function CSARSearch(pilotPos)  
+
 
   local VolRescue =
    {
    id = world.VolumeType.SPHERE,
    params =
     {
-    point = pilot:getPosition().p,
+    point = pilotPos,
     radius = 250
     }
    }
@@ -51,6 +52,7 @@ end
 
 function spawnPilotCSAR(Vec2Location)
   local CSARSpawn = SpawnPilot:SpawnFromVec2(Vec2Location)
+  CSARSpawn.getUnit(1)
 end
 
 function SpawnCSAR:onEvent(event)
@@ -63,19 +65,38 @@ function SpawnCSAR:onEvent(event)
     local CSARLocationCoord = COORDINATE:NewFromVec3(CSARLocationVec3)
     local roadLocation = CSARLocationCoord:GetClosestPointToRoad()
     local roadLocationVec2 = roadLocation:GetVec2() 
-    local spawnedPilot = spawnPilotCSAR(roadLocationVec2)
+    local spawnedPilot = SpawnPilot:SpawnFromVec2(roadLocationVec2)
+    local CSARPos = roadLocation:GetVec3()
     env.info(NumberCSARMissions)
-    CSARPilots[NumberCSARMissions] = spawnedPilot
-    CSARBeacons[NumberCSARMissions] = CSARPilots[NumberCSARMissions]:GetBeacon()
-    local ADFFreq = math.random(190,1750)
-    CSARBeacons[NumberCSARMissions]:RadioBeacon("SOS.ogg", ADFFreq , radio.modulation.AM, 25, 45*60)
-    trigger.action.outTextForCoalition(2, playerName.." has been hit and is going down! His wingman has reported he sees a good chute. A CSAR Mission is now available to rescue them. Thier ADF Beacon in on ".. ADFFreq.. " AM", 30, 1)
+    local ADFFreq = math.random(45, 69)  
+    ADFFreq = ADFFreq*1000000
+    local activateBeacon = { 
+      id = 'ActivateBeacon', 
+      params = { 
+      type = 1084, 
+      system = 7, 
+      name = "Downed pilot " ..NumberCSARMissions, 
+      callsign = "SOS", 
+      frequency = 040000000, 
+      } 
+    }
+    local setFrequency = { 
+      id = 'SetFrequency', 
+      params = {
+        frequency = ADFFreq,
+        modulation = radio.modulation.FM, 
+      } 
+    }
+    local downedPilot = Group.getByName('GroundedPilot#00' ..NumberCSARMissions)
+    local pilotController = Group.getController(downedPilot)
+--    pilotController:setCommand(ActivateBeacon)
+    pilotController:setCommand(setFrequency)
+    env.info("Beacon Activated")
+    trigger.action.outTextForCoalition(2, playerName:getPlayerName().." has been hit and is going down! His wingman reports he sees a good chute. A CSAR Mission is now available to rescue them, use the F10 menu for more information. His beacon is "..ADFFreq, 30, 1)
     trigger.action.outSoundForCoalition(2, "RadioClick.ogg")
-    trigger.smoke(CSARLocationVec3, 4)
-    
-    
-    SchedulerID = SchedulerObject:Schedule({}, CSARSearch, {CSARPilots[NumberCSARMissions]} , 10, 60, 0, 45*60 )
-    
+    trigger.action.smoke(CSARPos, 4)
+    SCHEDULER:New(spawnedPilot, CSARSearch, {CSARPos}, 10, 60, 0, 45*60)
+        
     
   end
 end

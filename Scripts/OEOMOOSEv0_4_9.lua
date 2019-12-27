@@ -63,24 +63,6 @@ RescueheloStennis:Start()
 AirbasePoliceCaucasus = ATC_GROUND_PERSIANGULF:New() 
 --REMEMBER to Install Ciribob Slot Blocker for kicking --
 
---[[ATIS Setup-- 
-atisAlDhafra=ATIS:New(AIRBASE.PersianGulf.Al_Dhafra_AB, 308.350)
-atisAlDhafra:SetRadioRelayUnitName("AlDhafraRadioRelay") 
-atisAlDhafra:SetTowerFrequencies({126.500, 251.000})
-atisAlDhafra:SetTACAN(96)
---atisAlDhafra:SetVOR(114.9)
---atisAlDhafra:SetActiveRunway("L")
-atisAlDhafra:SetRadioPower(1000)
-atisAlDhafra:Start()
-
-atisAlMinhad=ATIS:New(AIRBASE.PersianGulf.Al_Minhad_AB, 248.600)
-atisAlMinhad:SetRadioRelayUnitName("AlMinhadRadioRelay")
-atisAlMinhad:SetTowerFrequencies({121.800, 250.100})
-atisAlMinhad:SetTACAN(99)
---atisAlMinhad:AddILS(110.75, "27")
---atisAlMinhad:AddILS(110.70, "9")
-atisAlMinhad:SetRadioPower(1000)
-atisAlMinhad:Start()]]--
 
 -- Handle Blue AWACS and Tankers in OEO Using MOOSE --
 
@@ -119,11 +101,21 @@ function DARKSTAR()
   :InitCleanUp(10)
   
 end
+
+function IranAWACS()
+	IranAWACSSpawner = SPAWN:New("IranAWACS")
+	:InitLimit(1, 0)
+	:SpawnScheduled(10, 0)
+	--:InitRepeatOnLanding()
+	:InitCleanUp(10)
+
+end
  
 ARCO()
 SHELL()
 MAGIC()
 DARKSTAR()
+IranAWACS()
 
 -- OEO Red Air Overhaul --
 
