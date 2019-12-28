@@ -14,10 +14,6 @@ Disconnect = {}
 --Revived = {}
 MissionFailure = {}
 
--- Define Global Variables that are Al Minhad and Al Dhafra --
-
-
-
 -- Define Useful Functions for Amending Variable Values --
 
 function PlayerTakeoff()

@@ -2,7 +2,7 @@
 
 -- Airboss Settings Stennis --
 
-local airbossStennis=AIRBOSS:New("CV-74 Stennis", "CV-74 Stennis")
+--[[local airbossStennis=AIRBOSS:New("CV-74 Stennis", "CV-74 Stennis")
 airbossStennis:Start()
 
 --AirbossBasicSettings-- 
@@ -31,16 +31,16 @@ airbossStennis:SetMaxFlightsPerStack(2)
 airbossStennis:SetCollisionDistance(15)
 airbossStennis:SetMenuRecovery(20, 25, true, 30)
 airbossStennis:SetVoiceOversLSOByRaynor()
-airbossStennis:SetVoiceOversMarshalByFF()
+airbossStennis:SetVoiceOversMarshalByFF()]]--
 
 --RecoveryTankerSettings-- 
 TexacoStennis=RECOVERYTANKER:New(UNIT:FindByName("CV-74 Stennis"), "StennisRecoveryTanker")
 TexacoStennis:SetTakeoff(SPAWN.Takeoff.Air)
 TexacoStennis:SetTACAN(16, "TXO")
 TexacoStennis:SetRadio(128.5)
-TexacoStennis:SetRecoveryAirboss(true)
+--TexacoStennis:SetRecoveryAirboss(true)
 TexacoStennis:Start()
-airbossStennis:SetRecoveryTanker(TexacoStennis)
+--airbossStennis:SetRecoveryTanker(TexacoStennis)
 
 --[[AWACS Settings--
 DarkstarStennis=RECOVERYTANKER:New(UNIT:FindByName("CV-74 Stennis"), "DARKSTAR")
@@ -48,7 +48,7 @@ DarkstarStennis:Start()
 DarkstarStennis:SetTakeoffAir()
 DarkstarStennis:SetAltitude(28000)
 DarkstarStennis:SetRadio(235.000)
-airbossStennis:SetAWACS(DarkstarStennis)]]--
+airbossStennis:SetAWACS(DarkstarStennis)
 
 --AirbossTrapSheets-- 
 --airbossStennis:SetAutoSave()
@@ -57,7 +57,7 @@ airbossStennis:SetAWACS(DarkstarStennis)]]--
 RescueheloStennis=RESCUEHELO:New(UNIT:FindByName("CV-74 Stennis"), "Stennis Rescue Helo")
 RescueheloStennis:SetTakeoffAir()
 RescueheloStennis:SetRescueOff()
-RescueheloStennis:Start()
+RescueheloStennis:Start()]]--
 
 -- AirbasePolice-- 
 AirbasePoliceCaucasus = ATC_GROUND_PERSIANGULF:New() 

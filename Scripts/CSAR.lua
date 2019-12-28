@@ -7,56 +7,10 @@ SpawnCSAR = {}
 --CSARPickup = {}
 CSARDropoff = {}
 
-local function ifFoundCSAR(foundItem, val)
-                                
--- env.info("Search found groupID: " ..foundItem:getName())
- coalition = foundItem:getCoalition()
--- env.info("It is part of Coalition " ..coalition)
- 
- if coalition == 2 then
- 
-  if foundItem:hasAttribute("HELICOPTER") then
-        
-        if foundItem.getVelocity < 10 and  (foundItem.getPoint().y - land.getHeight({x=pos.x, y = pos.z})) < 5 then
-
-          MessagePickup = MESSAGE:New("Downed pilot picked up. RTB safely to complete CSAR mission."):ToClient(event.initiator)
-          CSARBeacons[i]:destroy()
-          CSARPilots[i]:destroy()
-          CSARZone[i]:destroy()
-          CurrentCSARReturns[#CurrentCSARReturns+1] = event.initiator
-        end
-        
-    end   
-        
-  end 
-    
-end      
-                                                                                
-  
-local function CSARSearch(pilotPos)  
-
-
-  local VolRescue =
-   {
-   id = world.VolumeType.SPHERE,
-   params =
-    {
-    point = pilotPos,
-    radius = 250
-    }
-   }
-  world.searchObjects(Object.Category.UNIT, VolRescue, ifFoundCSAR)
-
-
-end
-
-function spawnPilotCSAR(Vec2Location)
-  local CSARSpawn = SpawnPilot:SpawnFromVec2(Vec2Location)
-  CSARSpawn.getUnit(1)
-end
+-- Function to Detect Player Ejections and Create CSAR Mission --
 
 function SpawnCSAR:onEvent(event)
-  if event.id == 6 and event.initiator ~= nil 
+  if event.id == 6 and event.initiator:getPlayerName() ~= nil 
   then
     NumberCSARMissions = NumberCSARMissions + 1  
     local lostUnit = event.initiator
@@ -69,17 +23,8 @@ function SpawnCSAR:onEvent(event)
     local CSARPos = roadLocation:GetVec3()
     env.info(NumberCSARMissions)
     local ADFFreq = math.random(45, 69)  
+	local FreqForMessage = ADFFreq
     ADFFreq = ADFFreq*1000000
-    local activateBeacon = { 
-      id = 'ActivateBeacon', 
-      params = { 
-      type = 1084, 
-      system = 7, 
-      name = "Downed pilot " ..NumberCSARMissions, 
-      callsign = "SOS", 
-      frequency = 040000000, 
-      } 
-    }
     local setFrequency = { 
       id = 'SetFrequency', 
       params = {
@@ -88,18 +33,90 @@ function SpawnCSAR:onEvent(event)
       } 
     }
     local downedPilot = Group.getByName('GroundedPilot#00' ..NumberCSARMissions)
+    local downedUnit = downedPilot:getUnit(1)
+    local pilotPos = downedUnit:getPoint()
     local pilotController = Group.getController(downedPilot)
 --    pilotController:setCommand(ActivateBeacon)
     pilotController:setCommand(setFrequency)
     env.info("Beacon Activated")
-    trigger.action.outTextForCoalition(2, playerName:getPlayerName().." has been hit and is going down! His wingman reports he sees a good chute. A CSAR Mission is now available to rescue them, use the F10 menu for more information. His beacon is "..ADFFreq, 30, 1)
+    trigger.action.outTextForCoalition(2, playerName:getPlayerName().." has been hit and is going down! His wingman reports he sees a good chute. A CSAR Mission is now available to rescue them, use the F10 menu for more information. His beacon is active on "..FreqForMessage.. ".00 mHz FM.", 30, 1)
     trigger.action.outSoundForCoalition(2, "RadioClick.ogg")
     trigger.action.smoke(CSARPos, 4)
-    SCHEDULER:New(spawnedPilot, CSARSearch, {CSARPos}, 10, 60, 0, 45*60)
-        
-    
+    timer.scheduleFunction(CSARSearch, downedUnit, timer.getTime()+10)
   end
 end
+
+-- Function to look for Units in the Radius of the Downed Pilot --
+
+function CSARSearch(pilot)  
+
+  env.info("Searching...")
+  if pilot == nil then
+  
+    env.warning("Pilot is nil value")
+  
+  end  
+  env.info("Pilot is not nil")
+  env.info("Seach point set...")
+  --env.info("x: " ..pilot[1])
+  --env.info("y: " ..pilot[2])
+  local downedUnitPoint = pilot:getPoint()
+  local VolRescue =
+   {
+   id = world.VolumeType.SPHERE,
+   params =
+    {
+    point = downedUnitPoint,
+    radius = 10000
+    }
+   }
+   env.info("Volume initiated...")
+   world.searchObjects(Object.Category.UNIT, VolRescue, ifFoundCSAR)
+   env.info("No more items found....")
+  if pilot ~= nil then
+  
+    return (timer.getTime()+60)
+
+   else
+   
+    return nil
+   
+   end
+end
+
+-- Function upon finding unit in Range --
+
+local ifFoundCSAR = function(foundItem, val)
+ 
+ env.info("Found unit")                               
+-- env.info("Search found groupID: " ..foundItem:getName())
+ coalition = foundItem:getCoalition()
+-- env.info("It is part of Coalition " ..coalition)
+ 
+ if coalition == 2 then
+ 
+  if foundItem:hasAttribute("HELICOPTER") then
+        env.info("Of type helicopter on blue")
+        if foundItem.getVelocity < 10 and  (foundItem.getPoint().y - land.getHeight({x=pos.x, y = pos.z})) < 5 then
+
+          local MessagePickup = MESSAGE:New("Downed pilot picked up. RTB safely to complete CSAR mission."):ToClient(event.initiator)
+        end
+        
+    end   
+        
+  end 
+    
+end      
+                                                                                
+  
+
+
+function spawnPilotCSAR(Vec2Location)
+  local CSARSpawn = SpawnPilot:SpawnFromVec2(Vec2Location)
+  CSARSpawn.getUnit(1)
+end
+
+
 
 --function CSARPickup:onEvent(event)
 --  if event.id == 4 and event.initiator ~= nil and event.initiator.Category == "HELICOPTER"
