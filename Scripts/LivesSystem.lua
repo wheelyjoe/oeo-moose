@@ -90,8 +90,10 @@ F10CheckLives()
 -- Define Actions on Player Events --
 	
 function LivesEventHandler:onEvent(event)
-
-	if (event.id == 3 and event.place:getTypeName() == "Al Minhad AB" and event.initiator:getPlayerName() ~= nil) or (event.id == 3 and event.place:getTypeName() == "Al Dhafra AB" and event.initiator:getPlayerName() ~= nil) 
+	if event.initiator:getPlayerName() ~= nil and event.initiator:hasAttribute("Helicopters")
+		then
+			trigger.action.outTextForGroup(event.initiator:getGroup():getID(), "Helicopters not yet implemented into Lives System. WIP.", 10, 1)
+	elseif (event.id == 3 and event.place:getTypeName() == "Al Minhad AB" and event.initiator:getPlayerName() ~= nil) or (event.id == 3 and event.place:getTypeName() == "Al Dhafra AB" and event.initiator:getPlayerName() ~= nil) 
 		or (event.id == 3 and event.place:getTypeName() == "Stennis - airbase" and event.initiator:getPlayerName() ~= nil) or (event.id == 3 and event.place:getTypeName() == "LHA_Tarawa - airbase" and event.initiator:getPlayerName() ~= nil)
 		then
 			PlayerTakeoff()
@@ -103,9 +105,8 @@ function LivesEventHandler:onEvent(event)
 			PlayerNotAWOL()
 			local NotAWOLPilot = event.initiator
 			trigger.action.outTextForGroup(NotAWOLPilot:getGroup():getID(), "You have taken off again and are no longer considered AWOL. Return to Al Dhafra, Al Minhad or the Carrier to return your life to the pool.", 30, 1)
-		end
 
-	if (event.id == 4 and event.place:getTypeName() == "Al Minhad AB" and event.initiator:getPlayerName() ~= nil) or (event.id == 4 and event.place:getTypeName() == "Al Dhafra AB" and event.initiator:getPlayerName() ~= nil) 
+	elseif (event.id == 4 and event.place:getTypeName() == "Al Minhad AB" and event.initiator:getPlayerName() ~= nil) or (event.id == 4 and event.place:getTypeName() == "Al Dhafra AB" and event.initiator:getPlayerName() ~= nil) 
 		or (event.id == 4 and event.place:getTypeName() == "Stennis - airbase" and event.initiator:getPlayerName() ~= nil) or (event.id == 3 and event.place:getTypeName() == "LHA_Tarawa - airbase" and event.initiator:getPlayerName() ~= nil)
 		then 
 			--env.info("LANDING DETECTED")
@@ -118,31 +119,27 @@ function LivesEventHandler:onEvent(event)
 			local LandedPilot = event.initiator
 			timer.scheduleFunction(AWOLLandingLifeCheck, LandedPilot, timer.getTime()+1)
 			--env.info("SCHEDULED AWOL CHECK FUNCTION")
-	end
 
-	if event.id == 9 and event.initiator:getPlayerName() ~= nil
+	elseif event.id == 9 and event.initiator:getPlayerName() ~= nil
 		then
 			PlayerDie()
 			local KilledPilot = event.initiator
 			trigger.action.outTextForGroup(KilledPilot:getGroup():getID(), "You have been killed in action. Your life has been added to the death toll. Be more careful next time!", 10, 1)
 			--env.info("DEATH EVENT RUN")
-		end
 
-	if event.id == 6 and event.initiator:getPlayerName() ~= nil
+	elseif event.id == 6 and event.initiator:getPlayerName() ~= nil
 		then
 			PlayerMIA()
 			local EjectedPilot = event.initiator
 			--trigger.action.outTextForCoalition(2, EjectedPilot:getPlayerName().." has ejected safely and a CSAR mission is available to rescue them! Use the F10 Menu for more information. (STILL INACTIVE)", 10, 1) -- This line will be removed as Ali's CSAR Script sends the CSAR message.
 			--env.info("EJECT EVENT RUN")
-		end
 
-	if event.id == 20 and event.initiator:inAir() == true
+	elseif event.id == 20 and event.initiator:inAir() == true
 		then
 			PlayerLand()
 			--PlayerDie() -- Should do this but not sure about event.id 20.
 			--env.info("DISCONNECT EVENT RUN")
-		end
-
+	end
 end
 
 function LandingLifeCheck(PilotOnGround)
@@ -194,7 +191,18 @@ NumberCSARMissions = 0
 CSARPilotsOnBoard = {}
 NewCSARMission = {}
 CSARDropoff = {}
-ActiveCSARFrequences = {}
+ActiveCSARFrequencies = {}
+
+
+function PrintCSARFrequencies()
+	trigger.action.outTextForCoalition(2, "Active CSAR Beacons\n" ..table.concat(ActiveCSARFrequencies, "\n"), 10, 1)
+end
+
+function F10PrintCSARFrequencies()
+	local PrintLivesToPlayer = missionCommands.addCommandForCoalition(2, "Active CSAR Frequencies", nil, PrintCSARFrequencies, {})
+end
+
+F10PrintCSARFrequencies()
 
 function NewCSARMission:onEvent(event)
 	if event.id == 6 and event.initiator:getPlayerName() ~= nil
@@ -208,7 +216,8 @@ function NewCSARMission:onEvent(event)
 			local SpawnedPilot = SpawnDownedPilot:SpawnFromVec2(NearestRoadVec2)
 			local SpawnedPilotPosition = SpawnedPilot:GetVec3()
 			local PilotFrequency = math.random(45, 69)  
-			local FreqForMessage = PilotFrequency
+			local FreqForMessage = event.initiator:getPlayerName()..": "..PilotFrequency..".00 mHz FM"
+			ActiveCSARFrequencies[#ActiveCSARFrequencies + 1] = FreqForMessage
 			PilotFrequency = PilotFrequency*1000000
 			local setFrequency = { 
 				id = 'SetFrequency', 
@@ -223,18 +232,19 @@ function NewCSARMission:onEvent(event)
 			local DownedPilotController = Group.getController(DownedPilot)
 			DownedPilotController:setCommand(setFrequency)
 			trigger.action.outTextForCoalition(2, EjectedPlayer:getPlayerName().." has been hit and is going down! Initial reports suggest a good chute, and a CSAR mission is being readied to rescue him. Use the F10 menu for more information.", 20, 1)
-			trigger.action.outTextForCoalition(2, "ADF Beacon on " ..FreqForMessage.. ".00 mHz FM", 20, 1)
+			--trigger.action.outTextForCoalition(2, "Homing Beacon on " ..FreqForMessage, 20, 1)
 			local foundObjects = {}
-			timer.scheduleFunction(CSARAreaSearch, {DownedPilotUnit, foundObjects, DownedPilot}, timer.getTime()+ 10)
+			timer.scheduleFunction(CSARAreaSearch, {DownedPilotUnit, foundObjects, DownedPilot, FreqForMessage}, timer.getTime()+ 10)
 		end
 end
 
 function CSARAreaSearch(ParamTable)
-	env.info("Entered Search Function")
+	--env.info("Entered Search Function")
 	local Pilot = ParamTable[1]
 	local foundObjects = ParamTable[2]
 	local PilotPosition = Pilot:getPoint()
 	local PilotGroup = ParamTable[3]
+	local ActiveFrequency = ParamTable[4]
 	local CSARSearchZone = {
 		id = world.VolumeType.SPHERE,
 		params = {
@@ -243,38 +253,83 @@ function CSARAreaSearch(ParamTable)
 			}
 		}
 	world.searchObjects(Object.Category.UNIT, CSARSearchZone, ifFoundUnit, foundObjects)
-	env.info(#foundObjects)
+	--env.info(#foundObjects)
 	if #foundObjects >= 1
 		then
 			foundObjectsName = foundObjects[1]
-			trigger.action.outTextForCoalition(2, "You have successfully picked up the pilot! Get him back to the nearest airbase or FARP to complete the CSAR mission!", 20, 1)
-			trigger.action.deactivateGroup(PilotGroup)
 			PlayerCSARCount = trigger.misc.getUserFlag(foundObjectsName.."CSARCount")
-			env.info("FLAG EQUALS " ..PlayerCSARCount)
+			--env.info("FLAG EQUALS " ..PlayerCSARCount)
 				if PlayerCSARCount < 1
 					then
 						trigger.action.setUserFlag(foundObjectsName.."CSARCount", 1)
+						trigger.action.outTextForGroup(foundObjectsName, "You have successfully picked up the pilot! Get him back to the nearest NATO airbase or FARP to complete the CSAR mission!", 20, 1)
+						trigger.action.deactivateGroup(PilotGroup)
 						trigger.action.outTextForGroup(foundObjectsName, "Pilots on board: 1/4", 20, 1)
+						for i = 1, #ActiveCSARFrequencies
+							do
+								local FreqToRemove = ActiveCSARFrequencies[i]
+									if
+										FreqToRemove == ActiveFrequency
+											then
+												table.remove(ActiveCSARFrequencies, i)
+											
+									end
+							end
 						local FirstFlagCheck = trigger.misc.getUserFlag(foundObjectsName.."CSARCount")
-						env.info("FLAG EQUALS " ..FirstFlagCheck)
+						--env.info("FLAG EQUALS " ..FirstFlagCheck)
 				elseif PlayerCSARCount == 1
 					then
 						trigger.action.setUserFlag(foundObjectsName.."CSARCount", 2)
+						trigger.action.outTextForGroup(foundObjectsName, "You have successfully picked up the pilot! Get him back to the nearest NATO airbase or FARP to complete the CSAR mission!", 20, 1)
+						trigger.action.deactivateGroup(PilotGroup)
 						trigger.action.outTextForGroup(foundObjectsName, "Pilots on board: 2/4", 20, 1)
+						for i = 1, #ActiveCSARFrequencies
+							do
+								local FreqToRemove = ActiveCSARFrequencies[i]
+									if
+										FreqToRemove == ActiveFrequency
+											then
+												table.remove(ActiveCSARFrequencies, i)
+											
+									end
+							end
 						local SecondFlagCheck = trigger.misc.getUserFlag(foundObjectsName.."CSARCount")
-						env.info("FLAG EQUALS " ..SecondFlagCheck)
+						--env.info("FLAG EQUALS " ..SecondFlagCheck)
 				elseif PlayerCSARCount == 2
 					then
 						trigger.action.setUserFlag(foundObjectsName.."CSARCount", 3)
+						trigger.action.outTextForGroup(foundObjectsName, "You have successfully picked up the pilot! Get him back to the nearest NATO airbase or FARP to complete the CSAR mission!", 20, 1)
+						trigger.action.deactivateGroup(PilotGroup)
 						trigger.action.outTextForGroup(foundObjectsName, "Pilots on board: 3/4", 20, 1)
+						for i = 1, #ActiveCSARFrequencies
+							do
+								local FreqToRemove = ActiveCSARFrequencies[i]
+									if
+										FreqToRemove == ActiveFrequency
+											then
+												table.remove(ActiveCSARFrequencies, i)
+											
+									end
+							end
 						local ThirdFlagCheck = trigger.misc.getUserFlag(foundObjectsName.."CSARCount")
-						env.info("FLAG EQUALS " ..ThirdFlagCheck)
+						--env.info("FLAG EQUALS " ..ThirdFlagCheck)
 				elseif PlayerCSARCount == 3
 					then
 						trigger.action.setUserFlag(foundObjectsName.."CSARCount", 4)
-						trigger.action.outTextForGroup(foundObjectsName, "Your heli is now full! Return to the nearest airbase or FARP to drop the pilots off and complete the CSAR missions!", 20, 1)
+						trigger.action.outTextForGroup(foundObjectsName, "You have successfully picked up the pilot and your heli is now full! Return to the nearest NATO airbase or FARP to drop the pilots off and complete the CSAR missions!", 20, 1)
+						trigger.action.deactivateGroup(PilotGroup)
+						for i = 1, #ActiveCSARFrequencies
+							do
+								local FreqToRemove = ActiveCSARFrequencies[i]
+									if
+										FreqToRemove == ActiveFrequency
+											then
+												table.remove(ActiveCSARFrequencies, i)
+											
+									end
+							end
 						local FourthFlagCheck = trigger.misc.getUserFlag(foundObjectsName.."CSARCount")
-						env.info("FLAG EQUALS " ..FourthFlagCheck)
+						--env.info("FLAG EQUALS " ..FourthFlagCheck)
 				elseif PlayerCSARCount > 3
 					then
 						trigger.action.outTextForGroup(foundObjectsName, "Your heli is already full! You must return to base before collecting any more pilots!", 20, 1)
@@ -295,6 +350,7 @@ end
 function CSARDropoff:onEvent(event)
 	if (event.id == 4 and event.place:getTypeName() == "Al Minhad AB" and event.initiator:getPlayerName() ~= nil) or (event.id == 4 and event.place:getTypeName() == "Al Dhafra AB" and event.initiator:getPlayerName() ~= nil) 
 		or (event.id == 4 and event.place:getTypeName() == "Stennis - airbase" and event.initiator:getPlayerName() ~= nil) or (event.id == 4 and event.place:getTypeName() == "LHA_Tarawa - airbase" and event.initiator:getPlayerName() ~= nil) 
+		or (event.id == 4 and string.find(event.place:getName(), "FARP") and event.initiator:getPlayerName() ~= nil)
 		then
 			CheckCSARonBoard = trigger.misc.getUserFlag(event.initiator:getGroup():getID().."CSARCount")
 				if CheckCSARonBoard > 0

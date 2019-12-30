@@ -315,6 +315,54 @@ function IslandsMiG21F()
 	
 end
 
+function IslandsF5A()
+	IslandsF5ASpawner = SPAWN:NewWithAlias("IslandsF5A", "Island Tiger A")
+	:InitLimit(2, 0)
+	:SpawnScheduled(720, 0.25)
+	:InitRepeatOnLanding()
+	
+end
+
+function IslandsF5B()
+	IslandsF5BSpawner = SPAWN:NewWithAlias("IslandsF5B", "Island Tiger B")
+	:InitLimit(2, 0)
+	:SpawnScheduled(720, 0.25)
+	:InitRepeatOnLanding()
+	
+end
+
+function IslandsF5C()
+	IslandsF5CSpawner = SPAWN:NewWithAlias("IslandsF5C", "Island Tiger C")
+	:InitLimit(2, 0)
+	:SpawnScheduled(720, 0.25)
+	:InitRepeatOnLanding()
+	
+end
+
+function IslandsF5D()
+	IslandsF5DSpawner = SPAWN:NewWithAlias("IslandsF5D", "Island Tiger D")
+	:InitLimit(2, 0)
+	:SpawnScheduled(720, 0.25)
+	:InitRepeatOnLanding()
+	
+end
+
+function IslandsF5E()
+	IslandsF5ESpawner = SPAWN:NewWithAlias("IslandsF5E", "Island Tiger E")
+	:InitLimit(2, 0)
+	:SpawnScheduled(720, 0.25)
+	:InitRepeatOnLanding()
+	
+end
+
+function IslandsF5F()
+	IslandsF5FSpawner = SPAWN:NewWithAlias("IslandsF5F", "Island Tiger F")
+	:InitLimit(2, 0)
+	:SpawnScheduled(720, 0.25)
+	:InitRepeatOnLanding()
+	
+end
+
 
 -- Create Random Spawns for Each Zone --
 

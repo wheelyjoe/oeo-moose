@@ -312,56 +312,147 @@ function IslandsMiG21F()
 	
 end
 
+function IslandsF4A()
+	IslandsF4ASpawner = SPAWN:NewWithAlias("IslandsF4A", "Island Phantom A")
+	:InitLimit(2, 0)
+	:SpawnScheduled(720, 0.25)
+	:InitRepeatOnLanding()
+	
+end
+
+function IslandsF4B()
+	IslandsF4BSpawner = SPAWN:NewWithAlias("IslandsF4B", "Island Phantom B")
+	:InitLimit(2, 0)
+	:SpawnScheduled(720, 0.25)
+	:InitRepeatOnLanding()
+	
+end
+
+function IslandsF4C()
+	IslandsF4CSpawner = SPAWN:NewWithAlias("IslandsF4C", "Island Phantom C")
+	:InitLimit(2, 0)
+	:SpawnScheduled(720, 0.25)
+	:InitRepeatOnLanding()
+	
+end
+
+function IslandsF4D()
+	IslandsF4DSpawner = SPAWN:NewWithAlias("IslandsF4D", "Island Phantom D")
+	:InitLimit(2, 0)
+	:SpawnScheduled(720, 0.25)
+	:InitRepeatOnLanding()
+	
+end
+
+function IslandsF4E()
+	IslandsF4ESpawner = SPAWN:NewWithAlias("IslandsF4E", "Island Phantom E")
+	:InitLimit(2, 0)
+	:SpawnScheduled(720, 0.25)
+	:InitRepeatOnLanding()
+	
+end
+
+function IslandsF4F()
+	IslandsF4FSpawner = SPAWN:NewWithAlias("IslandsF4F", "Island Phantom F")
+	:InitLimit(2, 0)
+	:SpawnScheduled(720, 0.25)
+	:InitRepeatOnLanding()
+	
+end
+
 
 -- Create Random Spawns for Each Zone --
 
 -- Islands --
 
 local IslandDefences = math.random(1, 9)
-local TigersOrFishbeds = math.random(1, 2)
+local PhantomsOrFishbeds = math.random(1, 2)
 
-if IslandDefences == 1 then
+if IslandDefences == 1 and PhantomsOrFishbeds == 1 then
 
 	IslandsMiG21E()
 	
-elseif IslandDefences == 2 then
+elseif IslandDefences == 2 and PhantomsOrFishbeds == 1 then
 
 	IslandsMiG21F()
 	
-elseif IslandDefences == 3 then
+elseif IslandDefences == 3 and PhantomsOrFishbeds == 1 then
 
 	IslandsMiG21A()
 	IslandsMiG21C()
 	
-elseif IslandDefences == 4 then
+elseif IslandDefences == 4 and PhantomsOrFishbeds == 1 then
 
 	IslandsMiG21A()
 	IslandsMiG21E()
 	
-elseif IslandDefences == 5 then
+elseif IslandDefences == 5 and PhantomsOrFishbeds == 1 then
 
 	IslandsMiG21B()
 	IslandsMiG21E()
 	
-elseif IslandDefences == 6 then
+elseif IslandDefences == 6 and PhantomsOrFishbeds == 1 then
 
 	IslandsMiG21B()
 	IslandsMiG21D()
 	
-elseif IslandDefences == 7 then
+elseif IslandDefences == 7 and PhantomsOrFishbeds == 1 then
 
 	IslandsMiG21F()
 	IslandsMiG21C()
 	
-elseif IslandDefences == 8 then
+elseif IslandDefences == 8 and PhantomsOrFishbeds == 1 then
 
 	IslandsMiG21F()
 	IslandsMiG21D()
 	
-elseif IslandDefences == 9 then
+elseif IslandDefences == 9 and PhantomsOrFishbeds == 1 then
 
 	IslandsMiG21E()
 	IslandsMiG21F()
+	
+elseif IslandDefences == 1 and PhantomsOrFishbeds == 2 then
+
+	IslandsF4E()
+	
+elseif IslandDefences == 2 and PhantomsOrFishbeds == 2 then
+
+	IslandsF4F()
+	
+elseif IslandDefences == 3 and PhantomsOrFishbeds == 2 then
+
+	IslandsF4A()
+	IslandsF4C()
+	
+elseif IslandDefences == 4 and PhantomsOrFishbeds == 2 then
+
+	IslandsF4A()
+	IslandsF4E()
+	
+elseif IslandDefences == 5 and PhantomsOrFishbeds == 2 then
+
+	IslandsF4B()
+	IslandsF4E()
+	
+elseif IslandDefences == 6 and PhantomsOrFishbeds == 2 then
+
+	IslandsF4B()
+	IslandsF4D()
+	
+elseif IslandDefences == 7 and PhantomsOrFishbeds == 2 then
+
+	IslandsF4F()
+	IslandsF4C()
+	
+elseif IslandDefences == 8 and PhantomsOrFishbeds == 2 then
+
+	IslandsF4F()
+	IslandsF4D()
+	
+elseif IslandDefences == 9 and PhantomsOrFishbeds == 2 then
+
+	IslandsF4E()
+	IslandsF4F()
 	
 end
 
@@ -450,12 +541,12 @@ end
 
 local JaskAirDefences = math.random(1, 2)
 
-if JaskAirDefences == 1 then
+if PhantomsOrFishbeds == 2 then
 	
 	JaskWestF5()
 	JaskEastF5()
 
-elseif JaskAirDefences == 2 then
+elseif PhantomsOrFishbeds == 1 then
 	
 	JaskWestF4()
 	JaskEastF4()
