@@ -90,7 +90,10 @@ F10CheckLives()
 -- Define Actions on Player Events --
 	
 function LivesEventHandler:onEvent(event)
-	if event.initiator:getPlayerName() ~= nil and event.initiator:hasAttribute("Helicopters")
+	if event.initiator == nil
+		then
+			env.info("Event Initiator was Nil")
+	elseif event.initiator:getPlayerName() ~= nil and event.initiator:hasAttribute("Helicopters")
 		then
 			trigger.action.outTextForGroup(event.initiator:getGroup():getID(), "Helicopters not yet implemented into Lives System. WIP.", 10, 1)
 	elseif (event.id == 3 and event.place:getTypeName() == "Al Minhad AB" and event.initiator:getPlayerName() ~= nil) or (event.id == 3 and event.place:getTypeName() == "Al Dhafra AB" and event.initiator:getPlayerName() ~= nil) 
@@ -205,7 +208,10 @@ end
 F10PrintCSARFrequencies()
 
 function NewCSARMission:onEvent(event)
-	if event.id == 6 and event.initiator:getPlayerName() ~= nil
+	if event.initiator == nil
+		then
+			env.info("Event Initiator was nil")
+	elseif event.id == 6 and event.initiator:getPlayerName() ~= nil
 		then
 			NumberCSARMissions = NumberCSARMissions + 1  
 			local EjectedPlayer = event.initiator
@@ -348,7 +354,10 @@ function ifFoundUnit(foundItem, val)
 end
 
 function CSARDropoff:onEvent(event)
-	if (event.id == 4 and event.place:getTypeName() == "Al Minhad AB" and event.initiator:getPlayerName() ~= nil) or (event.id == 4 and event.place:getTypeName() == "Al Dhafra AB" and event.initiator:getPlayerName() ~= nil) 
+	if event.initiator == nil
+		then
+			env.info("Event Initiator was Nil")
+	elseif (event.id == 4 and event.place:getTypeName() == "Al Minhad AB" and event.initiator:getPlayerName() ~= nil) or (event.id == 4 and event.place:getTypeName() == "Al Dhafra AB" and event.initiator:getPlayerName() ~= nil) 
 		or (event.id == 4 and event.place:getTypeName() == "Stennis - airbase" and event.initiator:getPlayerName() ~= nil) or (event.id == 4 and event.place:getTypeName() == "LHA_Tarawa - airbase" and event.initiator:getPlayerName() ~= nil) 
 		or (event.id == 4 and string.find(event.place:getName(), "FARP") and event.initiator:getPlayerName() ~= nil)
 		then
