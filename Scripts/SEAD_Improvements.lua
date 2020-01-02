@@ -29,12 +29,12 @@ local function startSuppressionMag(suppUnit)
   suppUnit:getGroup():getController():setOnOff(false)
   --  suppUnit:GetGroup():setOption(9, 1) --radar off  
   --  env.info("Unit ".. suppUnit:getID().. " has turned radar off")
-  timer.scheduleFunction(recoverSuppresionMag, suppUnit, timer.getTime() + math.random(20,60))
+  timer.scheduleFunction(recoverSuppresionMag, suppUnit, timer.getTime() + math.random(60,90))
 
 end
 local function recoverSuppresion(suppUnit, time)
   suppUnit:getController():setOnOff(true)
-  env.warning("Unit " ..suppUnit:getName().. "has recovered from suppression.", false)
+  --env.warning("Unit " ..suppUnit:getName().. "has recovered from suppression.", false)
   return nil
 end
 local function ifFoundMag(foundItem, val)
@@ -52,7 +52,7 @@ local function ifFoundMag(foundItem, val)
     if foundItem:hasAttribute("SAM SR") then
 
       --      env.info(foundItem:getName().. " is a SAM SR")              
-      if math.random(1,100) > 25 then
+      if math.random(1,100) > 20 then
 
         --        env.info("Oh shit turn the radars off, said Ahmed, working at "..foundItem:getName()) 
         timer.scheduleFunction(startSuppressionMag, foundItem, timer.getTime() + math.random(5,15))
@@ -62,7 +62,7 @@ local function ifFoundMag(foundItem, val)
   end      
 end
 local function ifFoundK(foundItem, impactPoint)
-  env.info("Found unit to kill in radius")
+  --env.info("Found unit to kill in radius")
   local groupFound = foundItem:getGroup()
   if groupFound:getCategory() == 2 then
     local point1 = foundItem:getPoint()
@@ -70,29 +70,29 @@ local function ifFoundK(foundItem, impactPoint)
     local point2 = impactPoint
     point2.y = point2.y + 2
     if land.isVisible(point1, point2) == true then
-      env.info("killed")
+      --env.info("killed")
       trigger.action.explosion(point1, 1)
 
     end
   end                                                                    
 end
 local function ifFoundKS(foundItem, impactPoint)
-  env.info("Found static to kill in radius")
+  --env.info("Found static to kill in radius")
   local point1 = foundItem:getPoint()
-  env.info("found static pos")
+  --env.info("found static pos")
   point1.y = point1.y + 2
   local point2 = impactPoint
   point2.y = point2.y + 2
   if land.isVisible(point1, point2) == true then
     trigger.action.explosion(point1, 10)
-    env.info("killed")
+    --env.info("killed")
     
 
   end
 
 end
 local function ifFoundS(foundItem, impactPoint)
-  env.info("Found unit to suppress in radius")
+  --env.info("Found unit to suppress in radius")
   local groupFound = foundItem:getGroup()
   if groupFound:getCategory() == 2 then
     local point1 = foundItem:getPoint()
@@ -102,7 +102,7 @@ local function ifFoundS(foundItem, impactPoint)
     if land.isVisible(point1, point2) == true then
       foundItem:getGroup():getController():setOnOff(false)
       timer.scheduleFunction(recoverSuppresion, foundItem, time + math.random(35,120))
-       env.info("suppressed")
+       --env.info("suppressed")
       
 
     end
@@ -114,7 +114,7 @@ function shotHandler:onEvent(event)
   then
     if event.weapon then
 
-      env.info("weapon launched")          
+      --env.info("weapon launched")          
       local ordnance = event.weapon                  
       local ordnanceName = ordnance:getTypeName()
       local WeaponPos = ordnance:getPosition().p
@@ -122,7 +122,7 @@ function shotHandler:onEvent(event)
       local init = event.initiator
       local init_name = ' '
       if ordnanceName == "weapons.missiles.AGM_122" or ordnanceName == "weapons.missiles.AGM_88" or ordnanceName == "weapons.missiles.LD-10" then
-        env.info("of type ARM") 
+        --env.info("of type ARM") 
         local time = timer.getTime()               
         local VolMag =
           {
@@ -133,9 +133,9 @@ function shotHandler:onEvent(event)
               radius = 50000
             }
           }
-        env.warning("Begin Search for all magnum changes")
+        --env.warning("Begin Search for all magnum changes")
         world.searchObjects(Object.Category.UNIT, VolMag, ifFoundMag) 
-        env.warning("Finished Search for all magnum changes")  
+        --env.warning("Finished Search for all magnum changes")  
       end
       if init:isExist() then
         init_name = init:getName()
@@ -199,7 +199,7 @@ local function track_wpns(timeInterval, time)
         }
 
 
-      env.warning("Begin Search", false)
+      --env.warning("Begin Search", false)
       world.searchObjects(Object.Category.UNIT, VolK, ifFoundK,impactPoint)
       world.searchObjects(Object.Category.UNIT, VolS, ifFoundS,impactPoint)
       world.searchObjects(Object.Category.STATIC, VolKS, ifFoundKS,impactPoint)       
