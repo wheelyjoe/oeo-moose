@@ -31,7 +31,7 @@ airbossStennis:SetMaxFlightsPerStack(2)
 airbossStennis:SetCollisionDistance(15)
 airbossStennis:SetMenuRecovery(20, 25, true, 30)
 airbossStennis:SetVoiceOversLSOByRaynor()
-airbossStennis:SetVoiceOversMarshalByFF()]]--
+airbossStennis:SetVoiceOversMarshalByFF()
 
 --RecoveryTankerSettings-- 
 TexacoStennis=RECOVERYTANKER:New(UNIT:FindByName("CV-74 Stennis"), "StennisRecoveryTanker")
@@ -42,7 +42,7 @@ TexacoStennis:SetRadio(128.5)
 TexacoStennis:Start()
 --airbossStennis:SetRecoveryTanker(TexacoStennis)
 
---[[AWACS Settings--
+AWACS Settings--
 DarkstarStennis=RECOVERYTANKER:New(UNIT:FindByName("CV-74 Stennis"), "DARKSTAR")
 DarkstarStennis:Start()
 DarkstarStennis:SetTakeoffAir()
