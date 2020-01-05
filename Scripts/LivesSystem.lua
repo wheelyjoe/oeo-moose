@@ -90,9 +90,9 @@ F10CheckLives()
 -- Define Actions on Player Events --
 	
 function LivesEventHandler:onEvent(event)
-	if event.initiator == nil
+	if event.id == 12 or 1
 		then
-			env.info("Event Initiator was Nil")
+			return
 	elseif event.initiator:getPlayerName() ~= nil and event.initiator:hasAttribute("Helicopters")
 		then
 			trigger.action.outTextForGroup(event.initiator:getGroup():getID(), "Helicopters not yet implemented into Lives System. WIP.", 10, 1)
@@ -178,10 +178,7 @@ function RestartMission()
 end
 
 function MissionFailure:onEvent(event)
-	if event.initiator == nil
-		then
-			env.info("Event initiator was nil")
-	elseif event.id == 9 and event.initiator:getPlayerName() ~= nil and LivesLost > 500
+	if event.id == 9 and event.initiator and event.initiator:getPlayerName() ~= nil and LivesLost > 500
 		then
 			trigger.action.outTextForCoalition(2, "The death toll of Operation Enduring Odyssey has soared too high. Public opinion of the Operation has fallen and units are being pulled out of the Persian Gulf. Mission Failed.", 60, 1)
 			timer.scheduleFunction(RestartMission, {}, timer.getTime()+60)

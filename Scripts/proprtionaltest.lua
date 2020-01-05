@@ -50,45 +50,19 @@ function GroupsUpdater()
 	env.info("Updating Groups")
 	Tick = Tick + 1
 	env.info("Tick = "..Tick)
-	if Tick > 10
-		then
-			TestGroupASpawner:SpawnScheduleStart()
-			TestGroupBSpawner:SpawnScheduleStop()
-			TestGroupCSpawner:SpawnScheduleStop()
-			TestGroupDSpawner:SpawnScheduleStop()
-			return 60
-	elseif Tick > 8
-		then
-			TestGroupASpawner:SpawnScheduleStart()
-			TestGroupBSpawner:SpawnScheduleStart()
-			TestGroupCSpawner:SpawnScheduleStart()
-			TestGroupDSpawner:SpawnScheduleStart()
-			return 60
-	elseif Tick > 6
-		then
-			TestGroupASpawner:SpawnScheduleStart()
-			TestGroupBSpawner:SpawnScheduleStart()
-			TestGroupCSpawner:SpawnScheduleStart()
-			TestGroupDSpawner:SpawnScheduleStop()
-			return 60
-	elseif Tick > 4
-		then
-			TestGroupASpawner:SpawnScheduleStart()
-			TestGroupBSpawner:SpawnScheduleStart()
-			TestGroupCSpawner:SpawnScheduleStop()
-			TestGroupDSpawner:SpawnScheduleStop()
-			return 60
-	elseif Tick > 2
-		then
-			--TestGroupASpawner:SpawnScheduleStart()
-			TestGroupBSpawner:SpawnScheduleStart()
-			--TestGroupCSpawner:SpawnScheduleStop()
-			--TestGroupDSpawner:SpawnScheduleStop()
-			return 60
-	else
-		env.info("Nothing, return 60")
+	--if Tick > 3
+	--	then
+	--		env.info("Returning 60")
+	--elseif Tick == 3
+	--	then
+	--		env.info("Tick = 3, running schedule start")
+	--		TestGroupBSpawner:SpawnScheduleStart()
+	--		env.info("Spawned Test B - returning 60")
+	--		return 60
+	--else
+		env.info("Returning 60")
 		return 60
 	end
-end
+--end
 
 GroupsUpdateScheduler()
