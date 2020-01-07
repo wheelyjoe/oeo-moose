@@ -52,7 +52,7 @@ local function ifFoundMag(foundItem, val)
   if foundItem:hasAttribute("SAM SR") then
   
 --      env.info(foundItem:getName().. " is a SAM SR")              
-      if math.random(1,100) > 50 then
+      if math.random(1,100) > 20 then
       
 --        env.info("Oh shit turn the radars off, said Ahmed, working at "..foundItem:getName()) 
         timer.scheduleFunction(startSuppressionMag, foundItem, timer.getTime() + math.random(15,25))

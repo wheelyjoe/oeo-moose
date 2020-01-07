@@ -90,10 +90,7 @@ F10CheckLives()
 -- Define Actions on Player Events --
 	
 function LivesEventHandler:onEvent(event)
-	if event.id == 12 or 1
-		then
-			return
-	elseif event.initiator:getPlayerName() ~= nil and event.initiator:hasAttribute("Helicopters")
+	if (event.id == 3 or event.id == 4) and event.initiator:getPlayerName() ~= nil and event.initiator:hasAttribute("Helicopters")
 		then
 			trigger.action.outTextForGroup(event.initiator:getGroup():getID(), "Helicopters not yet implemented into Lives System. WIP.", 10, 1)
 	elseif (event.id == 3 and event.place:getTypeName() == "Al Minhad AB" and event.initiator:getPlayerName() ~= nil) or (event.id == 3 and event.place:getTypeName() == "Al Dhafra AB" and event.initiator:getPlayerName() ~= nil) 
