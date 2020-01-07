@@ -29,7 +29,7 @@ local function startSuppressionMag(suppUnit)
   suppUnit:getGroup():getController():setOnOff(false)
 --  suppUnit:GetGroup():setOption(9, 1) --radar off  
 --  env.info("Unit ".. suppUnit:getID().. " has turned radar off")
-  timer.scheduleFunction(recoverSuppresionMag, suppUnit, timer.getTime() + math.random(20,60))
+  timer.scheduleFunction(recoverSuppresionMag, suppUnit, timer.getTime() + math.random(50,100))
   
 end
 local function recoverSuppresion(suppUnit, time)
@@ -55,7 +55,7 @@ local function ifFoundMag(foundItem, val)
       if math.random(1,100) > 50 then
       
 --        env.info("Oh shit turn the radars off, said Ahmed, working at "..foundItem:getName()) 
-        timer.scheduleFunction(startSuppressionMag, foundItem, timer.getTime() + math.random(5,15))
+        timer.scheduleFunction(startSuppressionMag, foundItem, timer.getTime() + math.random(15,25))
         
       end   
         
