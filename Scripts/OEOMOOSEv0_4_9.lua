@@ -68,46 +68,46 @@ AirbasePoliceCaucasus = ATC_GROUND_PERSIANGULF:New()
 
 function ARCO()
   ARCOSpawner = SPAWN:New("ARCO")
-  :InitLimit(1, 0)
+  :InitLimit(1, 10)
   :SpawnScheduled(10, 0)
-  --:InitRepeatOnLanding()
-  :InitCleanUp(10)
+  :InitRepeatOnLanding()
+  --:InitCleanUp(10)
   
  end
  
 function SHELL()
   SHELLSpawner = SPAWN:New("SHELL")
-  :InitLimit(1, 0)
+  :InitLimit(1, 10)
   :SpawnScheduled(10, 0)
-  --:InitRepeatOnLanding()
-  :InitCleanUp(10)
+  :InitRepeatOnLanding()
+  --:InitCleanUp(10)
   
  end
 
 function MAGIC()
   MAGICSpawner = SPAWN:New("MAGIC")
-  :InitLimit(1, 0)
+  :InitLimit(1, 10)
   :SpawnScheduled(10, 0)
-  --:InitRepeatOnLanding()
-  :InitCleanUp(10)
+  :InitRepeatOnLanding()
+  --:InitCleanUp(10)
   
  end
  
 function DARKSTAR()
   DARKSTARSpawner = SPAWN:New("DARKSTAR")
-  :InitLimit(1, 0)
+  :InitLimit(1, 10)
   :SpawnScheduled(10, 0)
-  --:InitRepeatOnLanding()
-  :InitCleanUp(10)
+  :InitRepeatOnLanding()
+  --:InitCleanUp(10)
   
 end
 
 function IranAWACS()
 	IranAWACSSpawner = SPAWN:New("IranAWACS")
-	:InitLimit(1, 0)
+	:InitLimit(1, 10)
 	:SpawnScheduled(10, 0)
-	--:InitRepeatOnLanding()
-	:InitCleanUp(10)
+	:InitRepeatOnLanding()
+	--:InitCleanUp(10)
 
 end
  
@@ -123,7 +123,7 @@ IranAWACS()
 
 function JaskEastF5()
 	JaskEastF5Spawner = SPAWN:NewWithAlias("JaskEastF5", "Jask Tiger A")
-	:InitLimit(2, 0)
+	:InitLimit(2, 100)
 	:SpawnScheduled(720, 0.25)
 	:InitRepeatOnLanding()
 	
@@ -131,7 +131,7 @@ end
 
 function JaskWestF5()
 	JaskWestF5Spawner = SPAWN:NewWithAlias("JaskWestF5", "Jask Tiger B")
-	:InitLimit(2, 0)
+	:InitLimit(2, 100)
 	:SpawnScheduled(720, 0.25)
 	:InitRepeatOnLanding()
 	
@@ -139,7 +139,7 @@ end
 
 function JaskEastF4()
 	JaskEastF4Spawner = SPAWN:NewWithAlias("JaskEastF4", "Jask Phantom A")
-	:InitLimit(2, 0)
+	:InitLimit(2, 100)
 	:SpawnScheduled(720, 0.25)
 	:InitRepeatOnLanding()
 	
@@ -147,7 +147,7 @@ end
 
 function JaskWestF4()
 	JaskWestF4Spawner = SPAWN:NewWithAlias("JaskWestF4", "Jask Phantom B")
-	:InitLimit(2, 0)
+	:InitLimit(2, 100)
 	:SpawnScheduled(720, 0.25)
 	:InitRepeatOnLanding()
 	
@@ -158,7 +158,7 @@ end
 
 function EastCoastMiG21()
 	EastCoastMiG21Spawner = SPAWN:NewWithAlias("EastCoastMiG21", "East Coast Fishbed")
-	:InitLimit(2, 0)
+	:InitLimit(2, 100)
 	:SpawnScheduled(720, 0.25)
 	:InitRepeatOnLanding()
 	
@@ -166,7 +166,7 @@ end
 
 function EastCoastMiG29()
 	EastCoastMiG29Spawner = SPAWN:NewWithAlias("EastCoastMiG29", "East Coast Fulcrum")
-	:InitLimit(2, 0)
+	:InitLimit(2, 100)
 	:SpawnScheduled(720, 0.25)
 	:InitRepeatOnLanding()
 	
@@ -174,7 +174,7 @@ end
 
 function EastCoastF4()
 	EastCoastF4Spawner = SPAWN:NewWithAlias("EastCoastF4", "East Coast Phantom")
-	:InitLimit(2, 0)
+	:InitLimit(2, 100)
 	:SpawnScheduled(720, 0.25)
 	:InitRepeatOnLanding()
 	
@@ -185,7 +185,7 @@ end
 
 function QeshmEastMiG29A()
 	QeshmEastMiG29ASpawner = SPAWN:NewWithAlias("QeshmEastMiG29A", "Qeshm East Fulcrum A")
-	:InitLimit(2, 0)
+	:InitLimit(2, 100)
 	:SpawnScheduled(720, 0.25)
 	:InitRepeatOnLanding()
 	
@@ -193,7 +193,7 @@ end
 
 function QeshmEastMiG29B()
 	QeshmEastMiG29BSpawner = SPAWN:NewWithAlias("QeshmEastMiG29B", "Qeshm East Fulcrum B")
-	:InitLimit(2, 0)
+	:InitLimit(2, 100)
 	:SpawnScheduled(720, 0.25)
 	:InitRepeatOnLanding()
 	
@@ -204,7 +204,7 @@ end
 
 function QeshmWestMiG29A()
 	QeshmWestMiG29ASpawner = SPAWN:NewWithAlias("QeshmWestMiG29A", "Qeshm West Fulcrum A")
-	:InitLimit(2, 0)
+	:InitLimit(2, 100)
 	:SpawnScheduled(720, 0.25)
 	:InitRepeatOnLanding()
 	
@@ -212,7 +212,7 @@ end
 
 function QeshmWestMiG29B()
 	QeshmWestMiG29BSpawner = SPAWN:NewWithAlias("QeshmWestMiG29B", "Qeshm West Fulcrum B")
-	:InitLimit(2, 0)
+	:InitLimit(2, 100)
 	:SpawnScheduled(720, 0.25)
 	:InitRepeatOnLanding()
 	
@@ -220,7 +220,7 @@ end
 
 function QeshmWestMiG29C()
 	QeshmWestMiG29CSpawner = SPAWN:NewWithAlias("QeshmWestMiG29C", "Qeshm West Fulcrum C")
-	:InitLimit(2, 0)
+	:InitLimit(2, 100)
 	:SpawnScheduled(720, 0.25)
 	:InitRepeatOnLanding()
 	
@@ -231,7 +231,7 @@ end
 
 function TomcatsA()
 	TomcatsASpawner = SPAWN:NewWithAlias("IranTomcatA", "Iran Tomcat A")
-	:InitLimit(2, 0)
+	:InitLimit(2, 100)
 	:SpawnScheduled(720, 0.25)
 	:InitRepeatOnLanding()
 	
@@ -239,7 +239,7 @@ end
 
 function TomcatsB()
 	TomcatsBSpawner = SPAWN:NewWithAlias("IranTomcatB", "Iran Tomcat B")
-	:InitLimit(2, 0)
+	:InitLimit(2, 100)
 	:SpawnScheduled(720, 0.25)
 	:InitRepeatOnLanding()
 	
@@ -247,7 +247,7 @@ end
 
 function TomcatsC()
 	TomcatsCSpawner = SPAWN:NewWithAlias("IranTomcatC", "Iran Tomcat C")
-	:InitLimit(2, 0)
+	:InitLimit(2, 100)
 	:SpawnScheduled(720, 0.25)
 	:InitRepeatOnLanding()
 	
@@ -255,7 +255,7 @@ end
 
 function TomcatsD()
 	TomcatsDSpawner = SPAWN:NewWithAlias("IranTomcatD", "Iran Tomcat D")
-	:InitLimit(2, 0)
+	:InitLimit(2, 100)
 	:SpawnScheduled(720, 0.25)
 	:InitRepeatOnLanding()
 	
@@ -266,7 +266,7 @@ end
 
 function IslandsMiG21A()
 	IslandsMiG21ASpawner = SPAWN:NewWithAlias("IslandsMiG21A", "Island Fishbed A")
-	:InitLimit(2, 0)
+	:InitLimit(2, 100)
 	:SpawnScheduled(720, 0.25)
 	:InitRepeatOnLanding()
 	
@@ -274,7 +274,7 @@ end
 
 function IslandsMiG21B()
 	IslandsMiG21BSpawner = SPAWN:NewWithAlias("IslandsMiG21B", "Island Fishbed B")
-	:InitLimit(2, 0)
+	:InitLimit(2, 100)
 	:SpawnScheduled(720, 0.25)
 	:InitRepeatOnLanding()
 	
@@ -282,7 +282,7 @@ end
 
 function IslandsMiG21C()
 	IslandsMiG21CSpawner = SPAWN:NewWithAlias("IslandsMiG21C", "Island Fishbed C")
-	:InitLimit(2, 0)
+	:InitLimit(2, 100)
 	:SpawnScheduled(720, 0.25)
 	:InitRepeatOnLanding()
 	
@@ -290,7 +290,7 @@ end
 
 function IslandsMiG21D()
 	IslandsMiG21DSpawner = SPAWN:NewWithAlias("IslandsMiG21D", "Island Fishbed D")
-	:InitLimit(2, 0)
+	:InitLimit(2, 100)
 	:SpawnScheduled(720, 0.25)
 	:InitRepeatOnLanding()
 	
@@ -298,7 +298,7 @@ end
 
 function IslandsMiG21E()
 	IslandsMiG21ESpawner = SPAWN:NewWithAlias("IslandsMiG21E", "Island Fishbed E")
-	:InitLimit(2, 0)
+	:InitLimit(2, 100)
 	:SpawnScheduled(720, 0.25)
 	:InitRepeatOnLanding()
 	
@@ -306,7 +306,7 @@ end
 
 function IslandsMiG21F()
 	IslandsMiG21FSpawner = SPAWN:NewWithAlias("IslandsMiG21F", "Island Fishbed F")
-	:InitLimit(2, 0)
+	:InitLimit(2, 100)
 	:SpawnScheduled(720, 0.25)
 	:InitRepeatOnLanding()
 	
@@ -314,7 +314,7 @@ end
 
 function IslandsF4A()
 	IslandsF4ASpawner = SPAWN:NewWithAlias("IslandsF4A", "Island Phantom A")
-	:InitLimit(2, 0)
+	:InitLimit(2, 100)
 	:SpawnScheduled(720, 0.25)
 	:InitRepeatOnLanding()
 	
@@ -322,7 +322,7 @@ end
 
 function IslandsF4B()
 	IslandsF4BSpawner = SPAWN:NewWithAlias("IslandsF4B", "Island Phantom B")
-	:InitLimit(2, 0)
+	:InitLimit(2, 100)
 	:SpawnScheduled(720, 0.25)
 	:InitRepeatOnLanding()
 	
@@ -330,7 +330,7 @@ end
 
 function IslandsF4C()
 	IslandsF4CSpawner = SPAWN:NewWithAlias("IslandsF4C", "Island Phantom C")
-	:InitLimit(2, 0)
+	:InitLimit(2, 100)
 	:SpawnScheduled(720, 0.25)
 	:InitRepeatOnLanding()
 	
@@ -338,7 +338,7 @@ end
 
 function IslandsF4D()
 	IslandsF4DSpawner = SPAWN:NewWithAlias("IslandsF4D", "Island Phantom D")
-	:InitLimit(2, 0)
+	:InitLimit(2, 100)
 	:SpawnScheduled(720, 0.25)
 	:InitRepeatOnLanding()
 	
@@ -346,7 +346,7 @@ end
 
 function IslandsF4E()
 	IslandsF4ESpawner = SPAWN:NewWithAlias("IslandsF4E", "Island Phantom E")
-	:InitLimit(2, 0)
+	:InitLimit(2, 100)
 	:SpawnScheduled(720, 0.25)
 	:InitRepeatOnLanding()
 	
@@ -354,7 +354,7 @@ end
 
 function IslandsF4F()
 	IslandsF4FSpawner = SPAWN:NewWithAlias("IslandsF4F", "Island Phantom F")
-	:InitLimit(2, 0)
+	:InitLimit(2, 100)
 	:SpawnScheduled(720, 0.25)
 	:InitRepeatOnLanding()
 	
