@@ -106,7 +106,7 @@ function shotHandler:onEvent(event)
               local WeaponDir = ordnance:getPosition().x  
               local init = event.initiator
               local init_name = ' '
-              if ordnanceName == "weapons.missiles.AGM_122" or ordnanceName == "weapons.missiles.AGM_88" then
+              if ordnanceName == "weapons.missiles.AGM_122" or ordnanceName == "weapons.missiles.AGM_88" or ordnanceName == "weapons.missiles.LD-10" then
                 env.info("of type ARM") 
                 local time = timer.getTime()               
                 local VolMag =
