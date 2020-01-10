@@ -389,7 +389,7 @@ function shotHandler:onEvent(event)
       local WeaponDir = ordnance:getPosition().x  
       local init = event.initiator
       local init_name = ' '
-      if ordnanceName == "weapons.missiles.AGM_122" or ordnanceName == "weapons.missiles.AGM_88" or ordnanceName == "weapons.missiles.LD-10" or ordnanceName == "weapons.missiles.Kh-58U" or ordnanceName == "weapons.missiles.Kh-25MPU"then
+      if ordnanceName == "weapons.missiles.AGM_122" or ordnanceName == "weapons.missiles.AGM_88" or ordnanceName == "weapons.missiles.LD-10" or ordnanceName == "weapons.missiles.X_58" or ordnanceName == "weapons.missiles.X_25MP"then
         env.info("of type ARM") 
         local time = timer.getTime()               
         local VolMag =
