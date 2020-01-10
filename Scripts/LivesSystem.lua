@@ -8,6 +8,8 @@ LivesMIA = 0
 LivesAWOL = 0
 LivesEventHandler = {}
 MissionFailure = {}
+F10MenuOptions = {}
+AWOLPilots = {}
 
 -- Define Useful Functions for Amending Variable Values --
 
@@ -75,66 +77,54 @@ function PlayerNotAWOL()
 		end
 end
 	
--- F10 Menu Check Remaning Lives --
-
-function PrintLives()
-	trigger.action.outTextForCoalition(2, "Operation Enduring Odyssey Lives Status \n\nLives Remaining: " ..LivesRemaining.. " \nAirborne Pilots: " ..LivesAirborne.. "\nPilots MIA: " ..LivesMIA.. "\nLives Lost: " ..LivesLost, 10, 1)
-end
-
-function F10CheckLives()
-	local PrintLivesToPlayer = missionCommands.addCommandForCoalition(2, "Team Lives Status", nil, PrintLives, {})
-end
-
-F10CheckLives()
-
 -- Define Actions on Player Events --
 	
 function LivesEventHandler:onEvent(event)
-	if (event.id == 3 or event.id == 4) and event.initiator:getPlayerName() ~= nil and event.initiator:hasAttribute("Helicopters")
+	if (event.id == 3 or event.id == 4) and event.initiator and event.initiator:getPlayerName() ~= nil and event.initiator:hasAttribute("Helicopters")
 		then
 			trigger.action.outTextForGroup(event.initiator:getGroup():getID(), "Helicopters not yet implemented into Lives System. WIP.", 10, 1)
-	elseif (event.id == 3 and event.place:getTypeName() == "Al Minhad AB" and event.initiator:getPlayerName() ~= nil) or (event.id == 3 and event.place:getTypeName() == "Al Dhafra AB" and event.initiator:getPlayerName() ~= nil) 
-		or (event.id == 3 and event.place:getTypeName() == "Stennis - airbase" and event.initiator:getPlayerName() ~= nil) or (event.id == 3 and event.place:getTypeName() == "LHA_Tarawa - airbase" and event.initiator:getPlayerName() ~= nil)
+	elseif (event.initiator and event.id == 3 and event.place:getTypeName() == "Al Minhad AB" and event.initiator:getPlayerName() ~= nil) or (event.initiator and event.id == 3 and event.place:getTypeName() == "Al Dhafra AB" and event.initiator:getPlayerName() ~= nil) 
+		or (event.initiator and event.id == 3 and event.place:getTypeName() == "Stennis - airbase" and event.initiator:getPlayerName() ~= nil) or (event.initiator and event.id == 3 and event.place:getTypeName() == "LHA_Tarawa - airbase" and event.initiator:getPlayerName() ~= nil)
 		then
 			PlayerTakeoff()
 			local DepartedPilot = event.initiator
 			trigger.action.outTextForGroup(DepartedPilot:getGroup():getID(), "You have taken off and a life has been removed from the team. Land safely at either Al Dhafra, Al Minhad or the Carrier to return your life to the pool. Good luck!", 10, 1)
 			env.info("TAKEOFF EVENT RUN")
-	elseif event.id == 3 and event.initiator:getPlayerName() ~= nil
+	elseif event.id == 3 and event.initiator and event.initiator:getPlayerName() ~= nil
 		then
 			PlayerNotAWOL()
 			local NotAWOLPilot = event.initiator
 			trigger.action.outTextForGroup(NotAWOLPilot:getGroup():getID(), "You have taken off again and are no longer considered AWOL. Return to Al Dhafra, Al Minhad or the Carrier to return your life to the pool.", 30, 1)
-
-	elseif (event.id == 4 and event.place:getTypeName() == "Al Minhad AB" and event.initiator:getPlayerName() ~= nil) or (event.id == 4 and event.place:getTypeName() == "Al Dhafra AB" and event.initiator:getPlayerName() ~= nil) 
-		or (event.id == 4 and event.place:getTypeName() == "Stennis - airbase" and event.initiator:getPlayerName() ~= nil) or (event.id == 3 and event.place:getTypeName() == "LHA_Tarawa - airbase" and event.initiator:getPlayerName() ~= nil)
+			AWOLPilots[event.initiator:getPlayerName()] = nil
+	elseif (event.initiator and event.id == 4 and event.place:getTypeName() == "Al Minhad AB" and event.initiator:getPlayerName() ~= nil) or (event.initiator and event.id == 4 and event.place:getTypeName() == "Al Dhafra AB" and event.initiator:getPlayerName() ~= nil) 
+		or (event.initiator and event.id == 4 and event.place:getTypeName() == "Stennis - airbase" and event.initiator:getPlayerName() ~= nil) or (event.initiator and event.id == 3 and event.place:getTypeName() == "LHA_Tarawa - airbase" and event.initiator:getPlayerName() ~= nil)
 		then 
 			env.info("LANDING DETECTED")
 			local LandedPilot = event.initiator
 			timer.scheduleFunction(LandingLifeCheck, LandedPilot, timer.getTime()+1)
 			env.info("SCHEDULED CHECK FUNCTION")
-	elseif event.id == 4 and event.initiator:getPlayerName() ~= nil
+	elseif event.id == 4 and event.initiator and event.initiator:getPlayerName() ~= nil
 		then
 			env.info("LANDING AT WRONG AIRBASE DETECTED")
 			local LandedPilot = event.initiator
 			timer.scheduleFunction(AWOLLandingLifeCheck, LandedPilot, timer.getTime()+1)
 			env.info("SCHEDULED AWOL CHECK FUNCTION")
 
-	elseif event.id == 9 and event.initiator:getPlayerName() ~= nil
+	elseif event.id == 9 and event.initiator and event.initiator:getPlayerName() ~= nil
 		then
 			PlayerDie()
 			local KilledPilot = event.initiator
 			trigger.action.outTextForGroup(KilledPilot:getGroup():getID(), "You have been killed in action. Your life has been added to the death toll. Be more careful next time!", 10, 1)
 			env.info("DEATH EVENT RUN")
 
-	elseif event.id == 6 and event.initiator:getPlayerName() ~= nil
+	elseif event.id == 6 and event.initiator and event.initiator:getPlayerName() ~= nil and event.initiator:inAir() == true
 		then
 			PlayerMIA()
 			local EjectedPilot = event.initiator
 			--trigger.action.outTextForCoalition(2, EjectedPilot:getPlayerName().." has ejected safely and a CSAR mission is available to rescue them! Use the F10 Menu for more information. (STILL INACTIVE)", 10, 1) -- This line will be removed as Ali's CSAR Script sends the CSAR message.
 			env.info("EJECT EVENT RUN")
 
-	elseif event.id == 20 and event.initiator:inAir() == true
+	elseif event.id == 20 and event.initiator and event.initiator:inAir() == true
 		then
 			PlayerLand()
 			--PlayerDie() -- Should do this but not sure about event.id 20.
@@ -158,14 +148,25 @@ end
 function AWOLLandingLifeCheck(PilotOnGround)
 	env.info("RUNNING AWOL LIFE CHECK")
 	local PilotsLife = PilotOnGround:getLife()
+	local PilotsName = PilotOnGround:getPlayerName()
 	env.info(PilotsLife)
 		if PilotsLife > 0
 			then
 				env.info("PLAYER IS AWOL")
 				PlayerAWOL()
-				trigger.action.outTextForGroup(PilotOnGround:getGroup():getID(), "You have successfully landed, but not at a NATO base. You are currently considered AWOL. Return to either Al Dhafra, Al Minhad or the Carrier to return your life to the pool.", 30, 1)
+				AWOLPilots[PilotsName] = true
+				trigger.action.outTextForGroup(PilotOnGround:getGroup():getID(), "You have successfully landed, but not at a NATO base. You are currently considered AWOL. You have 15 minutes to take off again before you are considered KIA! Return to either Al Dhafra, Al Minhad or the Carrier to return your life to the pool.", 60, 1)
+				timer.scheduleFunction(AWOLCheck, PilotsName, timer.getTime() + 900)
 				env.info("AWOL EVENT RUN")
 			end
+end
+
+function AWOLCheck(PlayerName)
+	if AWOLPilots[PlayerName] == true
+		then
+			PlayerDie()
+			AWOLPilots[PlayerName] = nil
+	end
 end
 
 -- Define Function for actioning Mission Failure --
@@ -182,7 +183,7 @@ function MissionFailure:onEvent(event)
 		end
 end
 
-world.addEventHandler(LivesEventHandler)
+
 
 -- Operation Enduring Odyssey CSAR Script --
 
@@ -194,21 +195,12 @@ CSARDropoff = {}
 ActiveCSARFrequencies = {}
 
 
-function PrintCSARFrequencies()
-	trigger.action.outTextForCoalition(2, "Active CSAR Beacons\n" ..table.concat(ActiveCSARFrequencies, "\n"), 10, 1)
-end
-
-function F10PrintCSARFrequencies()
-	local PrintLivesToPlayer = missionCommands.addCommandForCoalition(2, "Active CSAR Frequencies", nil, PrintCSARFrequencies, {})
-end
-
-F10PrintCSARFrequencies()
 
 function NewCSARMission:onEvent(event)
 	if event.initiator == nil
 		then
 			env.info("Event Initiator was nil")
-	elseif event.id == 6 and event.initiator:getPlayerName() ~= nil
+	elseif event.id == 6 and event.initiator and event.initiator:getPlayerName() ~= nil and event.initiator:inAir() == true
 		then
 			env.info("Ran New CSAR Mission event")
 			NumberCSARMissions = NumberCSARMissions + 1  
@@ -374,5 +366,36 @@ function CSARDropoff:onEvent(event)
 	end
 end
 
+-- F10 Menu Additions -- TODO - Fix so that groups do not get additional menu items.
+PlayerGroupIDs = {}
+
+function F10MenuOptions:onEvent(event)
+    if event.id == world.event.S_EVENT_BIRTH and event.initiator and event.initiator:getPlayerName() ~= nil 
+		then
+			local PlayerID = event.initiator:getGroup():getID()
+			if PlayerGroupIDs[PlayerID] == nil then
+				PlayerGroupIDs[PlayerID] = true
+				missionCommands.addCommandForGroup(PlayerID, "Team Lives Status", nil, PrintLives, PlayerID)
+				missionCommands.addCommandForGroup(PlayerID, "Active CSAR Frequencies", nil, PrintCSARFrequencies, PlayerID)
+        end
+    end
+end
+
+function PrintLives(Player)
+	trigger.action.outTextForGroup(Player, "Operation Enduring Odyssey Lives Status \n\nLives Remaining: " ..LivesRemaining.. " \nAirborne Pilots: " ..LivesAirborne.. "\nPilots MIA: " ..LivesMIA.. "\nLives Lost: " ..LivesLost, 10, 1)
+end
+
+function PrintCSARFrequencies(Player)
+	if #ActiveCSARFrequencies < 1
+		then
+			trigger.action.outTextForGroup(Player, "There are currently no CSAR Missions available.", 10, 1)
+	else
+		trigger.action.outTextForGroup(Player, "Active CSAR Beacons\n" ..table.concat(ActiveCSARFrequencies, "\n"), 20, 1)
+	end
+end
+
+
 world.addEventHandler(NewCSARMission)
 world.addEventHandler(CSARDropoff)
+world.addEventHandler(LivesEventHandler)
+world.addEventHandler(F10MenuOptions)

@@ -40,10 +40,10 @@ end
 local function ifFoundMag(foundItem, val)
                                 
 -- env.info("Search found groupID: " ..foundItem:getName())
- coalition = foundItem:getCoalition()
+--coalition = foundItem:getCoalition()
 -- env.info("It is part of Coalition " ..coalition)
  
- if coalition == 2 then
+ if foundItem:getCoalition() == 2 then
 --    env.info("Group is friendly - Ignored")
 
  else 
