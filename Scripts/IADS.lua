@@ -135,13 +135,13 @@ local function PopulateEWRList()
           if redEWR[j] == gp:getName() then
 
             isInGroup = 1
-            --            env.info("Group already in EWR table, not adding...")
+             --           env.info("Group already in EWR table, not adding...")
           end
         end
         if isInGroup == 0 then
-          --          env.info("Group isn't already in EWR table, adding...")
+             --      env.info("Group isn't already in EWR table, adding...")
           redEWR[#redEWR+1] = gp:getName()
-          --          env.info("There are now " ..#redEWR.." in the EWR table.")
+             --       env.info("There are now " ..#redEWR.." in the EWR table.")
 
         end
       end
