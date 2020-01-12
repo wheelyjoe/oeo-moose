@@ -1,3 +1,31 @@
+SAMSLookupTable = {
+
+  ["Kub 1S91 str"] = {
+      ["EngageRange"] = 52000
+  },
+  ["S-300PS 40B6M tr"] = {  
+    ["EngageRange"] = 100000  
+  },
+  ["Osa 9A33 ln"] = {
+      ["EngageRange"] = 25000
+  },
+  ["snr s-125 tr"] = { 
+    ["EngageRange"] = 60000  
+  },
+  ["SNR_75V"] = {
+      ["EngageRange"] = 65000
+  },
+  ["Dog Ear radar"] = {  
+    ["EngageRange"] = 26000 
+  },
+  ["SA-11 Buk LN 9A310M1"] = {
+      ["EngageRange"] = 43000
+  },
+  ["Hawk tr"] = {
+      ["EngageRange"] = 60000
+  }
+}
+
 shotHandler = {}
 deathHandler = {}
 local redEWR = {}
@@ -7,6 +35,7 @@ local associatedSAMs = {}
 local tracked_weapons = {}
 local EWRFound = 0
 local AEWFound = 0
+local VisSpot = 0
 local enableSAMsite
 
 local function tablelength(T)
@@ -122,29 +151,18 @@ enableSAMsite = function(enableArgs)
   end
 end
 
-local function rangeOfSAM(SAMGroup)
+local function rangeOfSAM(SAMGroup)  
   local rangeMax = 0
-  --  env.info(SAMGroup:getName())
-  for index, data in pairs(SAMGroup:getUnits()) do
-    --    env.info("Unit "..index)
-    if data:getAmmo() then
-      --    env.info("Has ammo")
-      local ammoType = data:getAmmo() 
-
-      for _, item in pairs(ammoType) do
-
-        if item.desc.rangeMaxAltMin then
-          --          env.info("With max range of: "..item.desc.rangeMaxAltMax)
-          if (item.desc.rangeMaxAltMin)*1.5 > rangeMax then
-
-            rangeMax = (item.desc.rangeMaxAltMin)*1.5
-            --            env.info("The longest range missile in the group has a range of: "..rangeMax)
-            return rangeMax
-          end 
-        end       
-      end
-    end
-  end
+  for index, data in pairs(SAMGroup:getUnits()) do 
+--    env.info("Unit is: "..data:getTypeName())
+    if SAMSLookupTable[data:getTypeName()] then
+--      env.info(SAMSLookupTable[data:getTypeName()].EngageRange)
+      if SAMSLookupTable[data:getTypeName()].EngageRange > rangeMax then
+        rangeMax = SAMSLookupTable[data:getTypeName()].EngageRange
+      end   
+    end 
+  end  
+  return rangeMax
 end
 
 local function addToEWRList(gp)
@@ -281,7 +299,6 @@ local function associateSAMtoEWR()
 
 
     EWR["SAMs"] = associatedSAMs
-    env.info("There are "..#associatedSAMs.." sams to be added to the EWR")
     env.info("There are " ..tablelength(EWR.SAMs).." associated with "..EWR.group:getName())    
 
   end   
@@ -335,19 +352,19 @@ local function EWRDetectedAircraft()
 
   for i, EWR in pairs(redEWR) do
     if EWR.alive then
-      env.info("EWR "..EWR.group:getName())
+--      env.info("EWR "..EWR.group:getName())
       if EWR.group:getController() ~= nil then
         local EWRController = EWR.group:getController()
         --     env.info("Got controller")
         local detectedTargets = EWRController:getDetectedTargets()
-        env.info(#detectedTargets .." targets found")
+--        env.info(#detectedTargets .." targets found")
         for j = 1, #detectedTargets do
           if detectedTargets[j].object:getCoalition() == 2 then
-            env.info("Target "..detectedTargets[j].object:getName().." is blue")
-            env.info("There are "..tablelength(EWR.SAMs).." radars under this EWR")
+--            env.info("Target "..detectedTargets[j].object:getName().." is blue")
+--            env.info("There are "..tablelength(EWR.SAMs).." radars under this EWR")
             if (tablelength(EWR.SAMs) ~= 0) then
               for k = 1 , tablelength(EWR.SAMs) do
-                env.info("SAM is: "..EWR.SAMs[k])
+--                env.info("SAM is: "..EWR.SAMs[k])
                 if (redSAMS[EWR.SAMs[k]].range) then
                   env.info("Range of SAM associated with EWR is: "..redSAMS[EWR.SAMs[k]].range)
                   local distance = getDistance(redSAMS[EWR.SAMs[k]].group:getUnit(1):getPoint(), detectedTargets[j].object:getPoint())
@@ -380,11 +397,11 @@ local function AEWDetectedAircraft()
         env.info(#detectedTargets .." targets found")
         for j = 1, #detectedTargets do
           if detectedTargets[j].object:getCoalition() == 2 then
-            env.info("Target "..detectedTargets[j].object:getName().." is blue")
-            env.info("There are "..tablelength(AEW.SAMs).." radars under this AEW")
+--            env.info("Target "..detectedTargets[j].object:getName().." is blue")
+--            env.info("There are "..tablelength(AEW.SAMs).." radars under this AEW")
             if (tablelength(AEW.SAMs) ~= 0) then
               for k = 1 , tablelength(AEW.SAMs) do
-                env.info("SAM is: "..AEW.SAMs[k])
+--                env.info("SAM is: "..AEW.SAMs[k])
                 if (redSAMS[AEW.SAMs[k]].range) then
                   env.info("Range of SAM associated with AEW is: "..redSAMS[AEW.SAMs[k]].range)
                   local distance = getDistance(redSAMS[AEW.SAMs[k]].group:getUnit(1):getPoint(), detectedTargets[j].object:getPoint())
@@ -407,10 +424,10 @@ end
 
 local function ifFoundLocalAEW(foundItem)
 
-  env.info("Found Object while looking for AEWs")
+--  env.info("Found Object while looking for AEWs")
   if foundItem:hasAttribute("AWACS") then
 
-    env.info("It's an AEW")
+--    env.info("It's an AEW")
     AEWFound = 1
 
   end
@@ -418,10 +435,10 @@ end
 
 local function ifFoundLocalEWR(foundItem)
 
-  env.info("Found Object while looking for EWRs")
+--  env.info("Found Object while looking for EWRs")
   if foundItem:hasAttribute("EWR") then
 
-    env.info("It's an EWR")
+--    env.info("It's an EWR")
     EWRFound = 1
 
   end
@@ -464,20 +481,21 @@ local function localEWRSites()
   return 420
 end
 
-local function ifFoundVisualSearch(foundItem, val)
+local function ifFoundVisualSearch(foundItem)
 
-  env.info("Spotted something....")
+--  env.info("Spotted something....")
   if foundItem:getCoalition() == 2 then
 
-    val = 1
+    VisSpot = 1
 
   end
 end
 
 local function visualSearch()
 
-  local VisSpot= 0
+
   for i, SAM in pairs(redSAMS) do
+    VisSpot = 0
     local volVisSearch =
       {
         id = world.VolumeType.SPHERE,
@@ -486,7 +504,7 @@ local function visualSearch()
           point = SAM.group:getUnit(1):getPoint(),
           radius = 7000
         }
-      }    world.searchObjects(Object.Category.UNIT, volVisSearch, ifFoundVisualSearch, VisSpot)        
+      }    world.searchObjects(Object.Category.UNIT, volVisSearch, ifFoundVisualSearch)        
     if VisSpot == 1 then
       SAM.group:getController():setOption(AI.Option.Ground.id.ALARM_STATE,2)
       env.info("Visual spot, turning SAM site "..SAM.group:getName().." on.")
