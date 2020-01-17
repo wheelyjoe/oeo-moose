@@ -1,42 +1,39 @@
-SAMSLookupTable = {
+-- TO DO : DEATH HANDLER
+-- TO DO : Check suppression and hidden integration
 
-  ["Kub 1S91 str"] = {
-      ["EngageRange"] = 52000
-  },
-  ["S-300PS 40B6M tr"] = {  
-    ["EngageRange"] = 100000  
-  },
-  ["Osa 9A33 ln"] = {
-      ["EngageRange"] = 25000
-  },
-  ["snr s-125 tr"] = { 
-    ["EngageRange"] = 60000  
-  },
-  ["SNR_75V"] = {
-      ["EngageRange"] = 65000
-  },
-  ["Dog Ear radar"] = {  
-    ["EngageRange"] = 26000 
-  },
-  ["SA-11 Buk LN 9A310M1"] = {
-      ["EngageRange"] = 43000
-  },
-  ["Hawk tr"] = {
-      ["EngageRange"] = 60000
-  }
+local SAMRangeLookupTable = {
+
+    ["Kub 1S91 str"] = 52000,
+
+    ["S-300PS 40B6M tr"] =  100000,  
+
+    ["Osa 9A33 ln"] = 25000,
+
+    ["snr s-125 tr"] = 60000,  
+
+    ["SNR_75V"] = 65000,
+
+    ["Dog Ear radar"] = 26000,
+
+    ["SA-11 Buk LN 9A310M1"] = 43000,
+
+    ["Hawk tr"] = 60000
+
 }
 
-shotHandler = {}
-deathHandler = {}
-local redEWR = {}
-local redSAMS = {}
-local redAEW = {}
-local associatedSAMs = {}
+local SAMSite = {}
+local EWRSite = {}
+local AEWAircraft = {}
+local suppressedGroups = {}
 local tracked_weapons = {}
-local EWRFound = 0
-local AEWFound = 0
-local VisSpot = 0
-local enableSAMsite
+SEADHandler = {}
+
+local function TableConcat(t1,t2)
+  for i=1,#t2 do
+    t1[#t1+1] = t2[i]
+  end
+  return t1
+end
 
 local function tablelength(T)
   if T == nil then
@@ -52,16 +49,14 @@ local function tablelength(T)
   return count
 end
 
-local function getDistance (point1, point2)
+local function getDistance(point1, point2)
 
-  --  env.info("Calculating Distance")
   local x1 = point1.x
   local y1 = point1.y
   local z1 = point1.z
   local x2 = point2.x
   local y2 = point2.y
-  local z2= point2.z
-
+  local z2 = point2.z
   local dX = math.abs(x1-x2)
   local dY = math.abs(y1-y2)
   local dZ = math.abs(z1-z2)
@@ -71,535 +66,307 @@ local function getDistance (point1, point2)
 
 end
 
-local function unMagSuppress(SAMGroupName)
+local function getDistance3D(point1, point2)
 
-  redSAMS[SAMGroupName].suppressed = false
+  local x1 = point1.x
+  local y1 = point1.y
+  local z1 = point1.z
+  local x2 = point2.x
+  local y2 = point2.y
+  local z2 = point2.z
+
+  local dX = math.abs(x1-x2)
+  local dY = math.abs(y1-y2)
+  local dZ = math.abs(z1-z2)
+  local distance = math.sqrt(dX*dX + dZ*dZ + dY*dY)
+
+  return distance
 
 end
 
-local function unSuppress(GroupSupp)
+local function rangeOfSAM(SAMTRName)  
 
-  GroupSupp:getController():setOnOff(true)
+  if SAMRangeLookupTable[SAMTRName] then
+
+    return SAMRangeLookupTable[SAMTRName]
+
+  end   
+end
+
+local function disableSAM(disableArray)
+  if disableArray[3] then
+--    env.info("Emergency shutdown!")
+    if SAMSite[disableArray[1]] then
+    
+      SAMSite[disableArray[1]].DisableTime = disableArray[2]
+      SAMSite[disableArray[1]].EnableTime = nil
+      SAMSite[disableArray[1]].Emitting = false
+      SAMSite[disableArray[1]].SAMGroup:getController():setOption(AI.Option.Ground.id.ALARM_STATE,1)
+      if disableArray[2] then
+      
+--        env.info("SAM Site: "..SAMSite[disableArray[1]].Name.." disabled for "..disableArray[2].." seconds")
+            
+      else
+      
+--        env.info("SAM Site: "..SAMSite[disableArray[1]].Name.." disabled until instructed otherwise")
+              
+      end
+    end
+  else   
+--    env.info("Non-emergency shutdown")
+--    env.info(SAMSite[disableArray[1]].SAMGroup:getName().." is in the disable fcn")
+    local detectedTargets = SAMSite[disableArray[1]].SAMGroup:getController():getDetectedTargets()
+--    env.info("It has detected "..#detectedTargets.." units and will stay on")
+    if disableArray[2] == nil then
+--      env.info("Disabling with no disable time")
+      SAMSite[disableArray[1]].DisableTime = nil
+      SAMSite[disableArray[1]].EnableTime = nil
+      SAMSite[disableArray[1]].Emitting = false
+      SAMSite[disableArray[1]].SAMGroup:getController():setOption(AI.Option.Ground.id.ALARM_STATE,1)
+--      env.info("SAM Site: "..SAMSite[disableArray[1]].Name.." disabled until further notice")    
+
+    elseif (disableArray[2] > SAMSite[disableArray[1]].DisableTime) then
+--      env.info("Disabling with disable time")
+      SAMSite[disableArray[1]].DisableTime = disableArray[2]
+      SAMSite[disableArray[1]].EnableTime = nil
+      SAMSite[disableArray[1]].Emitting = false
+      SAMSite[disableArray[1]].SAMGroup:getController():setOption(AI.Option.Ground.id.ALARM_STATE,1)
+--      env.info("SAM Site: "..SAMSite[disableArray[1]].Name.." disabled for "..disableArray[2].." seconds")    
+
+    end
+  end
+end
+
+local function enableSAM(enableArray)
+
+  if SAMSite[enableArray[1]] and SAMSite[enableArray[1]].Hidden == false then
+  
+    SAMSite[enableArray[1]].Emitting = true
+    SAMSite[enableArray[1]].EnableTime = enableArray[2]
+    SAMSite[enableArray[1]].SAMGroup:getController():setOption(AI.Option.Ground.id.ALARM_STATE,2)
+    if enableArray[2] then
+    
+--      env.info("SAM Site: "..SAMSite[enableArray[1]].Name.." enabled for: " ..enableArray[2].."s")
+      
+    
+    else
+    
+--      env.info("SAM Site: "..SAMSite[enableArray[1]].Name.." enabled until further notice")
+  
+    
+    end
+
+  end
+end
+
+local function disableAllSAMs()
+
+  for i, SAM in pairs(SAMSite) do
+--    env.info("Disabling "..SAMS.Name)
+    local disableArray = {SAM.Name, nil, nil} 
+    disableSAM(disableArray)
+
+  end
+end
+
+local function enableUncontrolledSAMs()
+
+  for i, SAM in pairs(SAMSite) do
+
+    if tablelength(SAM.ControlledBy) == 0 then
+      local enableArray = {SAM.Name, nil}
+      enableSAM(enableArray)
+
+    end
+
+  end
 
 end
 
-local function disableSAMsite (disableArgs)
-  local SAMGroupName = disableArgs["GroupName"]
-  local offTime = disableArgs["time"]
-  --  env.info(SAMGroupName)
-  if redSAMS[SAMGroupName].emitting then
-    env.info("Disabling "..SAMGroupName)
-    local SAMController = redSAMS[SAMGroupName].group:getController()
-    local SAMDetectedTargets = SAMController:getDetectedTargets()  
-    if SAMDetectedTargets ~= nil then
-      for i = 1, #SAMDetectedTargets do
-        if SAMDetectedTargets[i].object:getCoalition() == 2 then
-          --        env.info("Group can still see blues, staying on...")
-          return timer.getTime()+60
+local function associateSAMS()
+
+--  env.info("Associating EWR SAMs")
+  for i, EWR in pairs(EWRSite) do
+  EWR.SAMsControlled = {}
+    for j, SAM in pairs(SAMSite) do
+  
+      if getDistance3D(SAM.Location, EWR.Location) < 100000 then
+        
+        EWR.SAMsControlled[SAM.Name] = SAM
+        SAM.ControlledBy[EWR.Name] = EWR
+--        env.info(SAM.Name.." associated with ".. EWR.Name)
+        
+      end
+    end
+--    env.info("There are: "..tablelength(EWR.SAMsControlled).." SAMs associated with "..EWR.Name)
+  end   
+--  env.info("Associating AEW SAMs")
+  for j, AEW in pairs(AEWAircraft) do
+  AEW.SAMsControlled = {}
+    for j, SAM in pairs(SAMSite) do
+
+      if getDistance3D(SAM.Location, AEW.AEWGroup:getUnit(1):getPoint()) < 250000 then
+
+        AEW.SAMsControlled[SAM.Name] = SAM
+        SAM.ControlledBy[AEW.Name] = AEW
+--        env.info(SAM.Name.." associated with ".. AEW.Name)
+
+      end
+    end
+--    env.info("There are: "..tablelength(AEW.SAMsControlled).." SAMs associated with "..AEW.Name)
+  end
+end
+
+local function populateLists()
+  SAMSite = {}
+  EWRSite = {}
+  AEWAircraft = {}
+  local isEWR = 0
+  local isSAM = 0
+  local samType
+  for i, gp in pairs(coalition.getGroups(1)) do
+
+    if gp:getCategory() == 2 then
+
+      for j, unt in pairs(gp:getUnits()) do
+
+        if unt:hasAttribute("EWR") then
+
+          isEWR = 1
+
+        elseif unt:hasAttribute("SAM TR") then
+
+          isSAM = 1
+          samType = unt:getTypeName()
+
         end
-      end
-    end    
-    redSAMS[SAMGroupName].group:getController():setOption(AI.Option.Ground.id.ALARM_STATE,1)
-    redSAMS[SAMGroupName].emitting = false
-    env.info("Disabled "..SAMGroupName)
-    if offTime ~= nil then
-      --      env.info("offTime = " ..offTime)
-      local enableArgs = {["GroupName"] = SAMGroupName, ["time"] = nil}
-      timer.scheduleFunction(enableSAMsite, enableArgs, timer.getTime()+offTime)
-
-    end  
-  end
-end
-
-local function emergencyShutoff (emergArgs)
-  local SAMGroupName = emergArgs["GroupName"]
-  local offTime = emergArgs["time"]
-  --  env.info(SAMGroupName)
-  if redSAMS[SAMGroupName].emitting then
-    --    env.info("Disabling "..SAMGroupName)
-    local SAMController = redSAMS[SAMGroupName].group:getController()
-    redSAMS[SAMGroupName].group:getController():setOption(AI.Option.Ground.id.ALARM_STATE,1)
-    redSAMS[SAMGroupName].emitting = false
-    --    env.info("Disabled "..SAMGroupName)
-    if offTime ~= nil then
-      local enableArgs = {["GroupName"] = SAMGroupName, ["time"] = nil}
-      timer.scheduleFunction(enableSAMsite, enableArgs, timer.getTime()+offTime)
-      --      env.info("Scheduled reenable for "..offTime.." seconds")
-
-    end  
-  end
-end
-
-enableSAMsite = function(enableArgs)
-  local SAMGroupName = enableArgs["GroupName"]
-  local onTime = enableArgs["time"]
-  env.info("Enabling ".. SAMGroupName)
-  if redSAMS[SAMGroupName].emitting == false then
-    if redSAMS[SAMGroupName].suppressed == false then
-      --    env.info("It's off for now")
-      redSAMS[SAMGroupName].group:getController():setOption(AI.Option.Ground.id.ALARM_STATE,2)
-      --    env.info("Now it's on")
-      redSAMS[SAMGroupName].emitting = true
-      env.info("Enabled "..SAMGroupName)
-
-      if onTime ~= nil then
-        local disableArgs = {["GroupName"] = SAMGroupName, ["time"] = nil}
-        timer.scheduleFunction(disableSAMsite, disableArgs, timer.getTime()+onTime)
 
       end
-    end
-  end
-end
 
-local function rangeOfSAM(SAMGroup)  
-  local rangeMax = 0
-  for index, data in pairs(SAMGroup:getUnits()) do 
---    env.info("Unit is: "..data:getTypeName())
-    if SAMSLookupTable[data:getTypeName()] then
---      env.info(SAMSLookupTable[data:getTypeName()].EngageRange)
-      if SAMSLookupTable[data:getTypeName()].EngageRange > rangeMax then
-        rangeMax = SAMSLookupTable[data:getTypeName()].EngageRange
-      end   
-    end 
-  end  
-  return rangeMax
-end
+      if isEWR == 1 then
+        EWRSite[gp:getName()] = {
 
-local function addToEWRList(gp)
+            ["Name"] = gp:getName(),
+            ["EWRGroup"] = gp,
+            ["SAMsControlled"] = {},
+            ["DetectedUnits"] = {},
+            ["Location"] = gp:getUnit(1):getPoint()
 
-  local groupName = gp:getName()
-  redEWR[groupName] = {["group"] = gp, ["alive"] = true, ["name"] = groupName}
-  --  env.info("Added "..groupName.." to EWR List")
-
-end
-
-local function addToSAMList(gp)
-
-  local groupName = gp:getName()
-  redSAMS[groupName] = 
-    {
-      ["suppressed"] = false,
-      ["group"] = gp,
-      ["emitting"] = true,
-      ["range"] = rangeOfSAM(gp),
-      ["alive"] = true,
-      ["name"] = groupName,
-      ["searchVol"] =
-      {
-        id = world.VolumeType.SPHERE,
-        params =
-        {
-          point = gp:getUnit(1):getPoint(),
-          raidus = rangeOfSAM(gp)
         }
-      }
-    }
-  --   env.info("Added " ..groupName.." to SAM List")
-  --       env.info("Group: " ..groupName.." added to SAM list")
+       env.info("EWR Registered, named: "..gp:getName())
+        isEWR = 0  
+        isSAM = 0
 
-end
+      elseif isSAM == 1 then
 
-local function populateListsGround()
+        SAMSite[gp:getName()] = {
 
-  for i, gp in pairs(coalition.getGroups(1), 2) do
-    local isSAM = 0
-    local isEWR = 0
-    for index, data in pairs(gp:getUnits()) do
-      if data:hasAttribute("SAM SR") then
-
-        isSAM = 1
-
-      elseif data:hasAttribute("EWR") then
-
-        isEWR = 1
+            ["Name"] = gp:getName(),
+            ["SAMGroup"] = gp,
+            ["Type"] = samType,
+            ["Location"] = gp:getUnit(1):getPoint(),
+            ["EngageRange"] = rangeOfSAM(samType),           
+            ["ControlledBy"] = {}, 
+            ["SuppressedTime"] = 0,
+            ["Suppressed"] = false,
+            ["Hidden"] = false,
+            ["HiddenTime"] = 0,
+            ["HideCountdown"] = 0,
+            ["HideCountdownBool"] = false,
+            ["EnableTime"] = 0,
+            ["DisableTime"] = 0,
+            ["SearchVolume"] =
+            {
+              id = world.VolumeType.SPHERE,
+              params =
+              {
+                point =  gp:getUnit(1):getPoint(),
+                raidus = rangeOfSAM(samType)
+              }
+            }
+        }
+        env.info("SAM Registered, named: "..gp:getName()..", it has SAM type: "..samType.." and a range of: "..rangeOfSAM(samType)..", at location: "..gp:getUnit(1):getPoint().x..", "..gp:getUnit(1):getPoint().z)
+        isEWR = 0  
+        isSAM = 0
 
       end
-    end
 
-    if isEWR == 1 then
+    elseif gp:getCategory() == 0 then
 
-      addToEWRList(gp)
+      for j, unt in pairs(gp:getUnits()) do
 
-    elseif isEWR == 0 and isSAM == 1 then
+        if unt:hasAttribute("AWACS") then
 
-      addToSAMList(gp)
+          AEWAircraft[gp:getName()] = {
 
-    end 
-  end 
-end
-
-local function populateAEWList()
-
-  for i, gp in pairs(coalition.getGroups(1), 0) do
-    for index, data in pairs(gp:getUnits()) do
-      if data:hasAttribute("AWACS") then
-        local groupName = gp:getName()
-        redAEW[groupName] =
-          {
-
-            ["group"] = gp, 
-            ["alive"] = true, 
-            ["name"] = groupName 
+              ["Name"] = gp:getName(),
+              ["AEWGroup"] = gp,
+              ["SAMsControlled"] = {},
+              ["Location"] = unt:getPoint(),
+              ["DetectedUnits"] = {}
 
           }
 
-      end
-    end 
-  end
-
-
-end
-
-local function disableAllSAMS()
-
-  for i, SAMGroup in pairs(redSAMS) do
-    local disableArgs = {["GroupName"] = SAMGroup.group:getName(), ["time"] = nil}
-    disableSAMsite(disableArgs)
-    --    env.info("Disabled " ..SAMGroup.group:getName())
-
-  end
-end
-
-local function foundEWRtoAssosciate(foundItem)
-
-  --  env.info("Found group")
-  local inList = 0
-  local foundItemGroup = foundItem:getGroup()
-  for i, SAM in pairs(redSAMS) do  
-    if SAM.group:getName() == foundItemGroup:getName() then   
-      if #associatedSAMs ~= 0 then
-        for i = 1, #associatedSAMs do
-          if associatedSAMs[i] == foundItemGroup:getName() then
-            --          env.info("Already in list")
-            return        
-          end
-        end
-      end
-      --    env.info("Adding SAM to local list")
-      associatedSAMs[#associatedSAMs+1] = foundItemGroup:getName()
-
-
+        end        
+      end    
     end  
   end
+  associateSAMS()
+  env.info("Lists Populated, there are "..tablelength(EWRSite).." EWR Sites, "..tablelength(SAMSite).." SAM Sites, and "..tablelength(AEWAircraft).." AEW Aircraft. SAM sites associated with IADS network.")
+  return timer.getTime() + 600
 end
 
-local function associateSAMtoEWR()
-  for i, EWR in pairs(redEWR) do
-    associatedSAMs = {}
-    local volEWRSearch =
-      {
-        id = world.VolumeType.SPHERE,
-        params =
-        {
-          point = EWR.group:getUnit(1):getPoint(),
-          radius = 120000
-        }
-      }
-    world.searchObjects(Object.Category.UNIT, volEWRSearch, foundEWRtoAssosciate)        
+local function suppress(suppArray)
+  
+  suppressedGroups[suppArray[1]:getName()] = {["SuppGroup"] = suppArray[1], ["SuppTime"] = suppArray[2]}
+  suppArray[1]:getController():setOnOff(false)
 
-
-    EWR["SAMs"] = associatedSAMs
-    env.info("There are " ..tablelength(EWR.SAMs).." associated with "..EWR.group:getName())    
-
-  end   
 end
 
-local function foundAEWtoAssosciate(foundItem)
-
-  --  env.info("Found group")
-  local inList = 0
-  local foundItemGroup = foundItem:getGroup()
-  for i, SAM in pairs(redSAMS) do  
-    if SAM.group:getName() == foundItemGroup:getName() then   
-      if #associatedSAMs ~= 0 then
-        for i = 1, #associatedSAMs do
-          if associatedSAMs[i] == foundItemGroup:getName() then
-            --          env.info("Already in list")
-            return        
-          end
-        end
-      end
-      --    env.info("Adding SAM to local list")
-      associatedSAMs[#associatedSAMs+1] = foundItemGroup:getName()
-
-
-    end  
-  end
-end
-
-local function associateSAMtoAEW()
-  for i, AEW in pairs(redAEW) do
-    associatedSAMs = {}
-    local volAEWSearch =
-      {
-        id = world.VolumeType.SPHERE,
-        params =
-        {
-          point = AEW.group:getUnit(1):getPoint(),
-          radius = 300000
-        }
-      }
-    world.searchObjects(Object.Category.UNIT, volAEWSearch, foundAEWtoAssosciate)        
-
-    AEW["SAMs"] = associatedSAMs
-    --    env.info("There are "..#associatedSAMs.." sams to be added to the AEW")
-    env.info("There are " ..tablelength(AEW.SAMs).." associated with "..AEW.group:getName())    
-
-  end   
-end
-
-local function EWRDetectedAircraft()
-
-  for i, EWR in pairs(redEWR) do
-    if EWR.alive then
---      env.info("EWR "..EWR.group:getName())
-      if EWR.group:getController() ~= nil then
-        local EWRController = EWR.group:getController()
-        --     env.info("Got controller")
-        local detectedTargets = EWRController:getDetectedTargets()
---        env.info(#detectedTargets .." targets found")
-        for j = 1, #detectedTargets do
-          if detectedTargets[j].object:getCoalition() == 2 then
---            env.info("Target "..detectedTargets[j].object:getName().." is blue")
---            env.info("There are "..tablelength(EWR.SAMs).." radars under this EWR")
-            if (tablelength(EWR.SAMs) ~= 0) then
-              for k = 1 , tablelength(EWR.SAMs) do
---                env.info("SAM is: "..EWR.SAMs[k])
-                if (redSAMS[EWR.SAMs[k]].range) then
-                  env.info("Range of SAM associated with EWR is: "..redSAMS[EWR.SAMs[k]].range)
-                  local distance = getDistance(redSAMS[EWR.SAMs[k]].group:getUnit(1):getPoint(), detectedTargets[j].object:getPoint())
-                  env.info("Distance from target to SAM is: "..distance)
-                  if redSAMS[EWR.SAMs[k]].range > distance then
-                    env.info("It's in range of "..redSAMS[EWR.SAMs[k]].group:getName())
-                    local enableArgs = {["GroupName"] = redSAMS[EWR.SAMs[k]].group:getName(), ["time"] = 300}
-                    enableSAMsite(enableArgs)
-                  end
-                end
-              end 
-            end
-          end
-        end
-      end
-    end
-  end
-  return timer.getTime()+10 
-end
-
-local function AEWDetectedAircraft()
-
-  for i, AEW in pairs(redAEW) do
-    if AEW.alive then
-      env.info("AEW "..AEW.group:getName())
-      if AEW.group:getController() ~= nil then
-        local EWRController = AEW.group:getController()
-        --     env.info("Got controller")
-        local detectedTargets = EWRController:getDetectedTargets()
-        env.info(#detectedTargets .." targets found")
-        for j = 1, #detectedTargets do
-          if detectedTargets[j].object:getCoalition() == 2 then
---            env.info("Target "..detectedTargets[j].object:getName().." is blue")
---            env.info("There are "..tablelength(AEW.SAMs).." radars under this AEW")
-            if (tablelength(AEW.SAMs) ~= 0) then
-              for k = 1 , tablelength(AEW.SAMs) do
---                env.info("SAM is: "..AEW.SAMs[k])
-                if (redSAMS[AEW.SAMs[k]].range) then
-                  env.info("Range of SAM associated with AEW is: "..redSAMS[AEW.SAMs[k]].range)
-                  local distance = getDistance(redSAMS[AEW.SAMs[k]].group:getUnit(1):getPoint(), detectedTargets[j].object:getPoint())
-                  env.info("Distance from target to SAM is: "..distance)
-                  if redSAMS[AEW.SAMs[k]].range > distance then
-                    env.info("It's in range of "..redSAMS[AEW.SAMs[k]].group:getName())
-                    local enableArgs = {["GroupName"] = redSAMS[AEW.SAMs[k]].group:getName(), ["time"] = 300}
-                    enableSAMsite(enableArgs)
-                  end
-                end
-              end 
-            end
-          end
-        end
-      end
-    end
-  end
-  return timer.getTime()+10 
-end
-
-local function ifFoundLocalAEW(foundItem)
-
---  env.info("Found Object while looking for AEWs")
-  if foundItem:hasAttribute("AWACS") then
-
---    env.info("It's an AEW")
-    AEWFound = 1
-
-  end
-end
-
-local function ifFoundLocalEWR(foundItem)
-
---  env.info("Found Object while looking for EWRs")
-  if foundItem:hasAttribute("EWR") then
-
---    env.info("It's an EWR")
-    EWRFound = 1
-
-  end
-end
-
-local function localEWRSites()
-  for i, SAM in pairs(redSAMS) do
-
-    AEWFound = 0   
-    local volAEWSearch =
-      {
-        id = world.VolumeType.SPHERE,
-        params =
-        {
-          point = SAM.group:getUnit(1):getPoint(),
-          radius = 300000
-        }
-      }
-    world.searchObjects(Object.Category.UNIT, volAEWSearch, ifFoundLocalAEW)        
-    EWRFound = 0   
-    local volEWRSearch =
-      {
-        id = world.VolumeType.SPHERE,
-        params =
-        {
-          point = SAM.group:getUnit(1):getPoint(),
-          radius = 100000
-        }
-      }
-    world.searchObjects(Object.Category.UNIT, volEWRSearch, ifFoundLocalEWR)        
-
-
-    if EWRFound == 0 and AEWFound == 0 then
-
-      local enableArgs = {["GroupName"] = SAM.group:getName(), ["time"] = nil}
-      env.info("No EWRs within 100km or AEW within 300km, turning SAM site "..SAM.group:getName().." on.")
-
-    end
-  end
-  return 420
-end
-
-local function ifFoundVisualSearch(foundItem)
-
---  env.info("Spotted something....")
-  if foundItem:getCoalition() == 2 then
-
-    VisSpot = 1
-
-  end
-end
-
-local function visualSearch()
-
-
-  for i, SAM in pairs(redSAMS) do
-    VisSpot = 0
-    local volVisSearch =
-      {
-        id = world.VolumeType.SPHERE,
-        params =
-        {
-          point = SAM.group:getUnit(1):getPoint(),
-          radius = 7000
-        }
-      }    world.searchObjects(Object.Category.UNIT, volVisSearch, ifFoundVisualSearch)        
-    if VisSpot == 1 then
-      SAM.group:getController():setOption(AI.Option.Ground.id.ALARM_STATE,2)
-      env.info("Visual spot, turning SAM site "..SAM.group:getName().." on.")
-    end
-  end
-  return 30
-end
-
-local function ifFoundMag(foundItem, val)
-
-  -- env.info("Search found groupID: " ..foundItem:getName()) 
-  if foundItem:getCoalition() == 1 then
-    --    env.info("Group is friendly - Ignored") 
-    --   env.info("Group is not friendly - Continue")
-    if foundItem:hasAttribute("SAM SR") then 
-      --      env.info(foundItem:getName().. " is a SAM SR")              
-      if math.random(1,100) > 20 then      
-        --        env.info("Oh shit turn the radars off, said Ahmed, working at "..foundItem:getName()..". Part of group: " ..foundItem:getGroup():getName()) 
-        local disableArgs = {["GroupName"] = foundItem:getGroup():getName(), ["time"] = math.random(50,100)}
-        redSAMS[foundItem:getGroup():getName()].suppressed = true
-        timer.scheduleFunction(unMagSuppress, foundItem:getGroup():getName(), timer.getTime()+disableArgs["time"])
-        timer.scheduleFunction(emergencyShutoff, disableArgs, timer.getTime() + math.random(15,25))
-      end           
-    end     
-  end      
-
+local function unSuppress(unSuppGroup)
+  
+  
+  unSuppGroup:getController():setOnOff(true)
+  suppressedGroups[unSuppGroup:getName()] = nil
 
 end
 
 local function ifFoundK(foundItem, impactPoint)
+  env.info("Found unit in kill range")
   local point1 = foundItem:getPoint()
   point1.y = point1.y + 2
   local point2 = impactPoint
   point2.y = point2.y + 2
   if land.isVisible(point1, point2) == true then
     trigger.action.explosion(point1, 1)
-    --    env.info("Unit"..foundItem.getID().. "Destroyed by script")                         
+    env.info("Unit"..foundItem.getID().. "Destroyed by script")                         
   end                                                                    
 end
 
 local function ifFoundS(foundItem, impactPoint)
-  --  env.info("Found unit in suppression range")
-  local point1 = foundItem:getPoint()
-  point1.y = point1.y + 5
-  local point2 = impactPoint
-  point2.y = point2.y + 5
-  if land.isVisible(point1, point2) == true then
-    foundItem:getController():setOnOff(false)
-    --    env.info("Suppressing.")    
-    local suppTime = timer.getTime() + math.random(35,120)
-    timer.scheduleFunction(unSuppress, foundItem, suppTime)
-    --    env.info("recovering in " ..suppTime.." seconds")
-
-  end
-
-end
-
-function shotHandler:onEvent(event)
-  if event.id == world.event.S_EVENT_SHOT 
-  then
-    if event.weapon then
-
-      --              env.info("weapon launched")          
-      local ordnance = event.weapon                  
-      local ordnanceName = ordnance:getTypeName()
-      local WeaponPos = ordnance:getPosition().p
-      local WeaponDir = ordnance:getPosition().x  
-      local init = event.initiator
-      local init_name = ' '
-      if ordnanceName == "weapons.missiles.AGM_122" or ordnanceName == "weapons.missiles.AGM_88" or ordnanceName == "weapons.missiles.LD-10" or ordnanceName == "weapons.missiles.X_58" or ordnanceName == "weapons.missiles.X_25MP"then
-        --        env.info("of type ARM") 
-        local time = timer.getTime()               
-        local VolMag =
-          {
-            id = world.VolumeType.SPHERE,
-            params =
-            {
-              point = ordnance:getPosition().p,
-              radius = 50000
-            }
-          }
-        --               env.warning("Begin Search for magnum suppression")
-        world.searchObjects(Object.Category.UNIT, VolMag, ifFoundMag)
-        --               env.warning("Finished Search for magnum suppression")  
-      end
-      if init:isExist() then
-        init_name = init:getName()
-      end               
-      tracked_weapons[event.weapon.id_] = { wpn = ordnance, init = init_name, pos = WeaponPos, dir = WeaponDir }                                         
+  if foundItem:getGroup():getCategory() == 2 then
+    local point1 = foundItem:getPoint()
+    point1.y = point1.y + 5
+    local point2 = impactPoint
+    point2.y = point2.y + 5
+    if land.isVisible(point1, point2) == true then
+      local suppArray = {foundItem:getGroup(), math.random(35,100)}
+      suppress(suppArray)
+      env.info("Suppressing.")
+    
     end
-
   end
 end
 
-local function track_wpns(timeInterval, time)
+local function magnumHide(hiddenGroup)
+
+  SAMSite[hiddenGroup:getName()].HideCountdownBool = true
+  SAMSite[hiddenGroup:getName()].HideCountdown = math.random(65,100)
+  env.info("Magnum Hide "..hiddenGroup:getName())  
+  
+end
+
+local function track_wpns()
   for wpn_id_, wpnData in pairs(tracked_weapons) do
 
     if wpnData.wpn:isExist() then  -- just update position and direction.
@@ -607,17 +374,17 @@ local function track_wpns(timeInterval, time)
       wpnData.dir = wpnData.wpn:getPosition().x
       wpnData.exMass = wpnData.wpn:getDesc().warhead.explosiveMass
     else -- wpn no longer exists, must be dead.
-      --                env.info("Mass of weapon warhead is " .. wpnData.exMass)
+--      env.info("Mass of weapon warhead is " .. wpnData.exMass)
       local suppressionRadius = wpnData.exMass
       local ip = land.getIP(wpnData.pos, wpnData.dir, 20)  -- terrain intersection point with weapon's nose.  Only search out 20 meters though.
       local impactPoint
       if not ip then -- use last position
         impactPoint = wpnData.pos
-        --                    trigger.action.outText("Impact Point:\nPos X: " .. impactPoint.x .. "\nPos Z: " .. impactPoint.z, 2)
+--        trigger.action.outText("Impact Point:\nPos X: " .. impactPoint.x .. "\nPos Z: " .. impactPoint.z, 2)
 
       else -- use intersection point
         impactPoint = ip
-        --                    trigger.action.outText("Impact Point:\nPos X: " .. impactPoint.x .. "\nPos Z: " .. impactPoint.z, 2)
+--        trigger.action.outText("Impact Point:\nPos X: " .. impactPoint.x .. "\nPos Z: " .. impactPoint.z, 2)
 
       end 
       local VolK =
@@ -639,84 +406,253 @@ local function track_wpns(timeInterval, time)
             radius = suppressionRadius
           }
         }                              
-      --                env.warning("Begin Search")
+--      env.warning("Begin Search")
       world.searchObjects(Object.Category.UNIT, VolK, ifFoundK,impactPoint)
       world.searchObjects(Object.Category.UNIT, VolS, ifFoundS,impactPoint)               
-      --                env.warning("Finished Search")
+--      env.warning("Finished Search")
       tracked_weapons[wpn_id_] = nil -- remove from tracked weapons first.         
 
 
     end
   end
-  return time + timeInterval
+  return timer.getTime() + .5
 end
 
-function deathHandler:onEvent(event)
-  if event.id == 5 then
-    env.info("Something died.")
-    if event.initiator then
-      env.info("It was: "..event.initiator:getName()..", from: " ..event.initiator:getGroup():getName())
-      if event.initiator:getGroup():getUnits() == nil then
-        for i, EWR in pairs(redEWR) do
-          if event.initiator:getGroup():getName() == EWR.name then
-
-            EWR.alive = false
-            env.info("EWR group destroyed and removed from list")
-
-          end
-        end
-        for i, SAM in pairs(redSAMS) do
-          if event.initiator:getGroup():getName() == SAM.name then
-
-            SAM.alive = false
-            env.info("SAM group destroyed and removed from list")            
-
-          end
-        end
-        for i, AEW in pairs(redAEW) do
-          if event.initiator:getGroup():getName() == AEW.name then
-
-            AEW.alive = false 
-            env.info("AEW group destroyed and removed from list")            
-
-          end
+function SEADHandler:onEvent(event)
+--  env.info("Event")
+  if event.id == 5 or event.id == 8 or event.id == 4 or event.id == 6 then
+--  env.info("Something died/landed/crashed/ejected")
+  if event.initiator then
+  
+    local eventGroup = event.initiator:getGroup()
+--    env.info("Got its group")
+    for i, SAM in pairs(SAMSite) do
+    
+      if eventGroup:getName() == SAM.Name then
+        if SAM.SAMGroup:isExist() ~= true then
+            env.info("It is a SAM with no radars left")
+            SAMSite[SAM.Name] = nil
+            env.info("Removed from list")
+            associateSAMS()       
         end
       end
-    end
-  end
-  if event.id == 4 then
-    env.info("Something landed.")
-    if event.initiator then
-      env.info("It was: "..event.initiator:getName()..", from: " ..event.initiator:getGroup():getName())
-      for i, AEW in pairs(redAEW) do
-        if event.initiator:getGroup():getName() == AEW.name then
+    end 
+    for i, EWR in pairs(EWRSite) do
+    
+      if eventGroup:getName() == EWR.Name then
+        if EWR.EWRGroup:isExist() ~= true then
+      
+          env.info("It was an EWR with no group left")
+          EWRSite[EWR.Name] = nil
+          env.info("Removed from list")
+          
+          for j, SAM in pairs(SAMSite) do
+            SAM.ControlledBy[eventGroup:getName()] = nil
+  
+          end
+        end
+      associateSAMS()    
+      enableUncontrolledSAMs()
+      end
+    end  
+    for i, AEW in pairs(AEWAircraft) do
+    
+      if eventGroup:getName() == AEW.Name then
+        if AEW.AEWGroup:isExist() then
+          env.info("It was an AEW aircraft with no group left")
+          AEWAircraft[AEW.Name] = nil
+          env.info("Removed from list")
+          
+          for j, SAM in pairs(SAMSite) do
+          
+            SAM.ControlledBy[eventGroup:getName()] = nil
+          
+          end         
+        end
+      associateSAMS()        
+      enableUncontrolledSAMs()
+      end
+    end   
+  end  
+ 
 
-          AEW.alive = false 
-          env.info("AEW group landed and removed from list")  
-
+  elseif event.id == world.event.S_EVENT_SHOT then
+--    env.info("A weapons was fired")
+    if event.weapon then
+      --      env.info("Definitely")          
+      local ordnance = event.weapon                  
+      local ordnanceName = ordnance:getTypeName()
+      local WeaponPoint = ordnance:getPoint()
+      local init = event.initiator
+      if ordnanceName == "weapons.missiles.AGM_122" or ordnanceName == "weapons.missiles.AGM_88" or ordnanceName == "weapons.missiles.LD-10" or ordnanceName == "weapons.missiles.X_58" or ordnanceName == "weapons.missiles.X_25MP"then
+--        env.info("of type ARM")
+        for i, SAM in pairs(SAMSite) do        
+          if math.random(1,100) > 20 and getDistance(SAM.Location, WeaponPoint) < 65000 then      
+            env.info("Oh shit turn the radars off, said Ahmed, working at "..SAM.Name) 
+            magnumHide(SAM.SAMGroup)
+          end     
         end
       end
+      tracked_weapons[event.weapon.id_] = { wpn = ordnance, init = init:getName(), pos = WeaponPoint,}                                                          
     end
   end
 end
 
-world.addEventHandler(shotHandler)
-world.addEventHandler(deathHandler)
-populateListsGround()
-env.info("Red EWR list populated, it contains " ..tablelength(redEWR).." sites")
-env.info("Red SAM list populated, it contains " ..tablelength(redSAMS).." sites")
-populateAEWList()
-env.info("Red AEW list populated, it contains " ..tablelength(redAEW).." sites")
-associateSAMtoEWR()
-env.info("Associated SAM sites to EWRs")
-associateSAMtoAEW()
-env.info("Associated SAM sites to AEWs")
-disableAllSAMS()
-env.info("Disabled all SAM Sites")
-localEWRSites()
-env.info("Enabled all SAMs with no EWR nearby")
-timer.scheduleFunction(localEWRSites, {},timer.getTime())
-timer.scheduleFunction(track_wpns, .5, timer.getTime() + 1)
-timer.scheduleFunction(EWRDetectedAircraft, {}, timer.getTime()+10)
-timer.scheduleFunction(AEWDetectedAircraft, {}, timer.getTime()+10)
-timer.scheduleFunction(visualSearch, {}, timer.getTime()+120)
+local function IADSMonitor()
+
+  
+  -- CHECK SUPPRESSION
+  for i, suppGroup in pairs(suppressedGroups)  do 
+--    env.info("Looking at suppressed groups") 
+    if suppGroup.SuppTime then
+--      env.info(suppGroup.SuppGroup:getName()" has suppression time: "..suppGroup.SuppTime)
+      if suppGroup.SuppTime < 1 then
+      
+        unSuppress(suppGroup.SuppGroup)
+      
+      else
+      
+        suppGroup.SuppTime = suppGroup.SuppTime - 1
+  
+      end
+    end 
+  end
+  -- CHECK MAGNUM HIDE
+  
+  for i, SAM in pairs(SAMSite) do
+--    env.info("For "..SAM.Name) 
+    if SAM.SAMGroup:isExist()  then     
+      if SAM.HideCountdownBool then 
+--        env.info(SAM.Name.." is trying to turn off...")
+        if SAM.HideCountdown < 1 then
+          
+ --         env.info("Hiding "..SAM.Name)
+          local disableArray = {SAM.Name, nil, true}
+          SAM.HideCountdownBool = false
+          SAM.Hidden = true
+          SAM.HiddenTime = math.random(65,100)
+          disableSAM(disableArray)
+        
+        else
+        
+ --         env.info(SAM.Name.. "'s countdown to hiding: "..SAM.HideCountdown)
+          SAM.HideCountdown = SAM.HideCountdown - 1
+          
+        end      
+      elseif SAM.Hidden then    
+        if SAM.HiddenTime < 1 then
+        
+--          env.info("Unhiding "..SAM.Name)
+          local enableArray = {SAM.Name, 120}
+          SAM.Hidden = false
+          enableSAM(enableArray)
+        
+        else
+        
+          SAM.HiddenTime = SAM.HiddenTime - 1
+--          env.info(SAM.Name.. "'s countdown to unhiding: "..SAM.HiddenTime)
+        
+        end   
+      end  
+      
+      if SAM.EnableTime and SAM.EnableTime < 1 and SAM.Hidden == false and SAM.Emitting then 
+        
+--        env.info(SAM.Name.." enable time has run out, disabling")
+        local disableArray = {SAM.Name, nil, nil} 
+        disableSAM(disableArray)
+      
+      elseif SAM.EnableTime and SAM.Emitting then
+      
+--        env.info(SAM.Name.." is counting down.")
+        SAM.EnableTime = SAM.EnableTime - 1 
+--        env.info(SAM.Name.." enable time counting down: "..SAM.EnableTime)      
+      
+      end
+      
+      if SAM.DisableTime and SAM.DisableTime < 1 and SAM.Emitting == false then
+      
+--        env.info(SAM.Name.." disable time has run out, enabling")
+        local enableArray = {SAM.Name, 120}
+        enableSAM(enableArray)
+      
+      elseif SAM.DisableTime and SAM.Emitting == false then
+      
+--        env.info(SAM.Name.." disable time counting down: "..SAM.DisableTime)
+        SAM.DisableTime = SAM.DisableTime - 1    
+      
+      end      
+    end
+   end
+  -- DETECT UNITS and ACTIVATE
+  for i, EWR in pairs(EWRSite) do
+    if EWR.EWRGroup:isExist() then
+      EWR.DetectedUnits = {}
+      if EWR.EWRGroup:getController() then
+        EWR.DetectedUnits = EWR.EWRGroup:getController():getDetectedTargets()
+--        env.info(EWR.Name.." has detected: "..tablelength(EWR.DetectedUnits).. " units")
+        for j, detectedTarget in pairs(EWR.DetectedUnits) do
+--         env.info("In detectedTarget loop")
+          if detectedTarget.object then
+--            env.info("For target: " ..detectedTarget.object:getName().." at point x: "..detectedTarget.object:getGroup():getUnit(1):getPoint().x..", z: "..detectedTarget.object:getGroup():getUnit(1):getPoint().z)
+            for k, SAM in pairs(EWR.SAMsControlled) do
+--              env.info("And SAM: "..SAM.Name.." at point x: "..SAM.Location.x..", z: "..SAM.Location.z.." with range: "..SAM.EngageRange) 
+              local rangeToSAM = getDistance(detectedTarget.object:getPoint(),SAM.Location)
+--              env.info("They are: "..rangeToSAM.. "m apart.")    
+              if rangeToSAM < SAM.EngageRange then 
+--                env.info("They are in range")               
+                local enableArray = {SAM.Name, 180}
+                enableSAM(enableArray)
+              
+              end
+            end 
+          end
+        end  
+      end 
+    end  
+  end
+  for i, AEW in pairs(AEWAircraft) do
+    if AEW.AEWGroup:isExist() then
+      AEW.DetectedUnits = {}
+      if AEW.AEWGroup:getController() then
+        AEW.DetectedUnits = AEW.AEWGroup:getController():getDetectedTargets()
+--        env.info(AEW.Name.." has detected: "..tablelength(AEW.DetectedUnits).. " units")
+        for j, detectedTarget in pairs(AEW.DetectedUnits) do
+--          env.info("In detectedTarget loop")
+          if detectedTarget.object then
+--            env.info("For target: " ..detectedTarget.object:getName().." at point x: "..detectedTarget.object:getGroup():getUnit(1):getPoint().x..", z: "..detectedTarget.object:getGroup():getUnit(1):getPoint().z)
+            for k, SAM in pairs(AEW.SAMsControlled) do
+--              env.info("And SAM: "..SAM.Name.." at point x: "..SAM.Location.x..", z: "..SAM.Location.z.." with range: "..SAM.EngageRange) 
+              local rangeToSAM = getDistance(detectedTarget.object:getPoint(),SAM.Location)
+--              env.info("They are: "..rangeToSAM.. "m apart.")    
+              if rangeToSAM < SAM.EngageRange then 
+--                env.info("They are in range")               
+                local enableArray = {SAM.Name, 180}
+                enableSAM(enableArray)
+              
+              end
+            end 
+          end
+        end  
+      end      
+    end  
+  end  
+    
+--  env.info("IADS Monitor complete and running again in 1s")
+  return timer.getTime() + 1
+end
+
+populateLists()
+
+disableAllSAMs()
+
+enableUncontrolledSAMs()
+
+IADSMonitor() 
+
+timer.scheduleFunction(populateLists, {}, timer.getTime() + 600)
+
+timer.scheduleFunction(track_wpns, {}, timer.getTime() + 1)
+
+timer.scheduleFunction(IADSMonitor,{},timer.getTime()+1)
+
+world.addEventHandler(SEADHandler)
