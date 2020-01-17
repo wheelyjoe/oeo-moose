@@ -361,7 +361,7 @@ end
 local function magnumHide(hiddenGroup)
 
   SAMSite[hiddenGroup:getName()].HideCountdownBool = true
-  SAMSite[hiddenGroup:getName()].HideCountdown = math.random(65,100)
+  SAMSite[hiddenGroup:getName()].HideCountdown = math.random(15,25)
   env.info("Magnum Hide "..hiddenGroup:getName())  
   
 end
