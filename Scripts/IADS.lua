@@ -146,13 +146,11 @@ local function enableSAM(enableArray)
     if enableArray[2] then
     
 --      env.info("SAM Site: "..SAMSite[enableArray[1]].Name.." enabled for: " ..enableArray[2].."s")
-      
-    
+         
     else
     
 --      env.info("SAM Site: "..SAMSite[enableArray[1]].Name.." enabled until further notice")
-  
-    
+      
     end
 
   end
@@ -169,17 +167,16 @@ local function disableAllSAMs()
 end
 
 local function enableUncontrolledSAMs()
-
+  local count = 0
   for i, SAM in pairs(SAMSite) do
 
     if tablelength(SAM.ControlledBy) == 0 then
       local enableArray = {SAM.Name, nil}
       enableSAM(enableArray)
-
+      count = count + 1
     end
-
   end
-
+--  env.info("There are"..count.."uncontrolled SAMs")
 end
 
 local function associateSAMS()
@@ -189,7 +186,7 @@ local function associateSAMS()
   EWR.SAMsControlled = {}
     for j, SAM in pairs(SAMSite) do
   
-      if getDistance3D(SAM.Location, EWR.Location) < 100000 then
+      if getDistance3D(SAM.Location, EWR.Location) < 80000 then
         
         EWR.SAMsControlled[SAM.Name] = SAM
         SAM.ControlledBy[EWR.Name] = EWR
@@ -204,7 +201,7 @@ local function associateSAMS()
   AEW.SAMsControlled = {}
     for j, SAM in pairs(SAMSite) do
 
-      if getDistance3D(SAM.Location, AEW.AEWGroup:getUnit(1):getPoint()) < 250000 then
+      if getDistance3D(SAM.Location, AEW.AEWGroup:getUnit(1):getPoint()) < 0 then
 
         AEW.SAMsControlled[SAM.Name] = SAM
         SAM.ControlledBy[AEW.Name] = AEW
@@ -241,7 +238,6 @@ local function populateLists()
         end
 
       end
-
       if isEWR == 1 then
         EWRSite[gp:getName()] = {
 
@@ -256,7 +252,7 @@ local function populateLists()
         isEWR = 0  
         isSAM = 0
 
-      elseif isSAM == 1 then
+      elseif isSAM == 1 and rangeOfSAM(samType) then
 
         SAMSite[gp:getName()] = {
 
@@ -284,7 +280,10 @@ local function populateLists()
               }
             }
         }
---        env.info("SAM Registered, named: "..gp:getName()..", it has SAM type: "..samType.." and a range of: "..rangeOfSAM(samType)..", at location: "..gp:getUnit(1):getPoint().x..", "..gp:getUnit(1):getPoint().z)
+--        env.info("SAM Registered, named: "..gp:getName())
+--        env.info("It has SAM type: "..samType)
+--        env.info("And a range of: "..rangeOfSAM(samType))
+--       env.info("At location: "..gp:getUnit(1):getPoint().x..", "..gp:getUnit(1):getPoint().z)
         isEWR = 0  
         isSAM = 0
 
@@ -324,7 +323,6 @@ end
 
 local function unSuppress(unSuppGroup)
   
-  
   unSuppGroup:getController():setOnOff(true)
   suppressedGroups[unSuppGroup:getName()] = nil
 
@@ -360,7 +358,7 @@ end
 local function magnumHide(hiddenGroup)
 
   SAMSite[hiddenGroup:getName()].HideCountdownBool = true
-  SAMSite[hiddenGroup:getName()].HideCountdown = math.random(15,25)
+  SAMSite[hiddenGroup:getName()].HideCountdown = math.random(8,15)
 --  env.info("Magnum Hide "..hiddenGroup:getName())  
   
 end
@@ -470,7 +468,7 @@ function SEADHandler:onEvent(event)
       if ordnanceName == "weapons.missiles.AGM_122" or ordnanceName == "weapons.missiles.AGM_88" or ordnanceName == "weapons.missiles.LD-10" or ordnanceName == "weapons.missiles.X_58" or ordnanceName == "weapons.missiles.X_25MP"then
 --        env.info("of type ARM")
         for i, SAM in pairs(SAMSite) do        
-          if math.random(1,100) > 10 and getDistance(SAM.Location, WeaponPoint) < 65000 then      
+          if math.random(1,100) > 5 and getDistance(SAM.Location, WeaponPoint) < 65000 then      
 --            env.info("Oh shit turn the radars off, said Ahmed, working at "..SAM.Name) 
             magnumHide(SAM.SAMGroup)
           end     
@@ -595,14 +593,12 @@ local function IADSMonitor()
 end
 
 populateLists()
+timer.scheduleFunction(track_wpns, {}, timer.getTime() + 1)
 env.info("Populated SAM, AEW and EWR lists")
 disableAllSAMs()
-
 enableUncontrolledSAMs()
 env.info("Uncontrolled SAMs enabled")
 timer.scheduleFunction(populateLists, {}, timer.getTime() + 600)
-
-timer.scheduleFunction(track_wpns, {}, timer.getTime() + 1)
 env.info("Weapon tracking begun")
 timer.scheduleFunction(IADSMonitor,{},timer.getTime()+1)
 env.info("IADS monitoring begun")
