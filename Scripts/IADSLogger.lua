@@ -376,10 +376,10 @@ local function track_wpns()
       local impactPoint
       if not ip then -- use last position
         impactPoint = wpnData.pos
-        trigger.action.outText("Impact Point:\nPos X: " .. impactPoint.x .. "\nPos Z: " .. impactPoint.z, 2)
+        --trigger.action.outText("Impact Point:\nPos X: " .. impactPoint.x .. "\nPos Z: " .. impactPoint.z, 2)
       else -- use intersection point
         impactPoint = ip
-        trigger.action.outText("Impact Point:\nPos X: " .. impactPoint.x .. "\nPos Z: " .. impactPoint.z, 2)
+        --trigger.action.outText("Impact Point:\nPos X: " .. impactPoint.x .. "\nPos Z: " .. impactPoint.z, 2)
       end 
       local VolK =
         {
