@@ -1,7 +1,5 @@
 -- Operation Enduring Odyssey Loadouts Limitation Script --#
 
---TODO: CREATE INDIVIDUAL MAX LOADOUT COUNTS PER AIRFRAME
-
 TakeoffLoadoutCheck = {}
 AddLoadoutF10Check = {}
 
@@ -204,6 +202,7 @@ function LoadoutChecker(target)
 				then
 					trigger.action.outTextForGroup(target:getGroup():getID(), "Your equipped loadout is invalid! You have five minutes to land at a NATO airbase and rearm before you will be kicked to spectator. Loadout limits and weapon costs are outlined in the briefing images and document, and you can use the F10 Menu to validate your loadout.", 60, 1)
 					timer.scheduleFunction(PlayerKicker, target, timer.getTime() + 300)
+					timer.scheduleFunction(KickWarning, target, timer.getTime() + 240)
 			else
 					trigger.action.outTextForGroup(target:getGroup():getID(), "Current A/A Weaponry Cost = "..AirLoadoutValue.."/"..AirframeMaxAA..".\nCurrent A/G Weaponry Cost = "..GroundLoadoutValue.."/"..AirframeMaxAG..".\nYou are over budget! Please re-arm to a cheaper loadout before departing, or you will be kicked to spectator!", 20, 1)
 		end
@@ -216,15 +215,23 @@ function LoadoutChecker(target)
 				trigger.action.outTextForGroup(target:getGroup():getID(), "Current A/A Weaponry Cost = "..AirLoadoutValue.."/"..AirframeMaxAA..".\nCurrent A/G Weaponry Cost = "..GroundLoadoutValue.."/"..AirframeMaxAG..".\nYour current loadout is valid, you may depart and fly your mission. Good luck!", 20, 1)
 			end
 		end
-	end
+end
 
 -- Create F10 Entry for Players to Check Current Loadout --
 
+LoadoutsMenuPlayerIDs = {}
+
 function AddLoadoutF10Check:onEvent(event)
-	if event.id == 15 and event.initiator and event.initiator:getPlayerName() ~= nil
+	if event.id == world.event.S_EVENT_BIRTH and event.initiator and event.initiator:getPlayerName() ~= nil
 		then
+			local PlayerID = event.initiator:getGroup():getID()
 			local SpawnedPlayer = event.initiator
-			missionCommands.addCommandForGroup(SpawnedPlayer:getGroup():getID(), "Validate Loadout", nil, LoadoutChecker, SpawnedPlayer)
+				if 	LoadoutsMenuPlayerIDs[PlayerID] == nil then	
+					LoadoutsMenuPlayerIDs[PlayerID] = true
+					missionCommands.addCommandForGroup(SpawnedPlayer:getGroup():getID(), "Validate Loadout", nil, LoadoutChecker, SpawnedPlayer)
+			else
+				return
+			end
 	end
 end
 
@@ -238,6 +245,16 @@ function TakeoffLoadoutCheck:onEvent(event)
 			timer.scheduleFunction(LoadoutChecker, LoadoutCheckTarget, timer.getTime() + 3)
 	end
 end
+
+function KickWarning(target)
+	if target:inAir() == false
+		then
+			return
+	else
+		trigger.action.outTextForGroup(target:getGroup():getID(), "WARNING! You are still airborne with an invalid loadout! You will be removed to spectator in ONE MINUTE unless you land and re-arm!", 30, 1)
+	end
+end
+
 
 function PlayerKicker(target)
 	--env.info("Starting Kick Check!")
@@ -302,8 +319,7 @@ function PlayerKicker(target)
 	if	AirLoadoutValue > AirframeMaxAA or GroundLoadoutValue > AirframeMaxAG
 			then
 				--env.info("Destroying Target!")
-				local NameOfGroup = target:getGroup():getName()
-				--env.info("Group name = "..NameOfGroup)
+				trigger.action.outTextForGroup(target:getGroup():getID(), "You have been removed to spectator for flying with an invalid loadout. Please read the loadout limits in the briefing & briefing images, and use a valid loadout. You can use the F10 Menu to validate your loadout before departing.", 60, 1)
 				trigger.action.setUserFlag(target:getGroup():getName(), 100)
 				--env.info("Set Flag to 100")
 			else
