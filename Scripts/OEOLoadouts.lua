@@ -29,25 +29,25 @@ local RestrictedWeapons = {
 							["weaponValue"] = 3,
 						},
 						{	["weaponName"] = "GBU-10",
-							["weaponValue"] = 11,
-						},
-						{	["weaponName"] = "GBU-12",
-							["weaponValue"] = 5,
-						},
-						{	["weaponName"] = "GBU-16",
 							["weaponValue"] = 7,
 						},
+						{	["weaponName"] = "GBU-12",
+							["weaponValue"] = 2,
+						},
+						{	["weaponName"] = "GBU-16",
+							["weaponValue"] = 4,
+						},
 						{	["weaponName"] = "GBU-24",
-							["weaponValue"] = 11,
+							["weaponValue"] = 7,
 						},
 						{	["weaponName"] = "GBU-38",
 							["weaponValue"] = 5,
 						},
 						{	["weaponName"] = "GBU-31",
-							["weaponValue"] = 11,
+							["weaponValue"] = 7,
 						},
 						{	["weaponName"] = "GBU-31(V)3/B",
-							["weaponValue"] = 11,
+							["weaponValue"] = 7,
 						},
 						{	["weaponName"] = "AGM-62",
 							["weaponValue"] = 7,
@@ -59,7 +59,7 @@ local RestrictedWeapons = {
 							["weaponValue"] = 11,
 						},
 						{	["weaponName"] = "LS-5-600",
-							["weaponValue"] = 8,
+							["weaponValue"] = 11,
 						},
 						{	["weaponName"] = "C-802AKG",
 							["weaponValue"] = 16,
@@ -107,22 +107,22 @@ local RestrictedWeapons = {
 							["weaponValue"] = 6,
 						},
 						{	["weaponName"] = "CBU-87",
-							["weaponValue"] = 5,
+							["weaponValue"] = 3,
 						},
 						{	["weaponName"] = "CBU-97",
-							["weaponValue"] = 5,
+							["weaponValue"] = 6,
 						},
 						{	["weaponName"] = "CBU-99",
-							["weaponValue"] = 5,
+							["weaponValue"] = 3,
 						},
 						{	["weaponName"] = "CBU-107",
 							["weaponValue"] = 5,
 						},
 						{	["weaponName"] = "CBU-109",
-							["weaponValue"] = 5,
+							["weaponValue"] = 6,
 						},
 						{	["weaponName"] = "Mk-20",
-							["weaponValue"] = 5,
+							["weaponValue"] = 3,
 						},
 }
 
@@ -141,8 +141,9 @@ local RestrictedAirframes = {
 }
 	
 
-function LoadoutChecker(target)
+function LoadoutChecker(targetGroup)
 	--env.info("BEGINNING LOADOUT CHECKER")
+	local target = targetGroup:getUnit(1)
 	local EquippedLoadout = target:getAmmo()
 	local AirLoadoutValue = 0
 	local GroundLoadoutValue = 0
@@ -203,7 +204,7 @@ function LoadoutChecker(target)
 					trigger.action.outTextForGroup(target:getGroup():getID(), "Your equipped loadout is invalid! You have five minutes to land at a NATO airbase and rearm before you will be kicked to spectator. Loadout limits and weapon costs are outlined in the briefing images and document, and you can use the F10 Menu to validate your loadout.", 60, 1)
 					timer.scheduleFunction(PlayerKicker, target, timer.getTime() + 300)
 					timer.scheduleFunction(KickWarning, target, timer.getTime() + 240)
-			else
+				else
 					trigger.action.outTextForGroup(target:getGroup():getID(), "Current A/A Weaponry Cost = "..AirLoadoutValue.."/"..AirframeMaxAA..".\nCurrent A/G Weaponry Cost = "..GroundLoadoutValue.."/"..AirframeMaxAG..".\nYou are over budget! Please re-arm to a cheaper loadout before departing, or you will be kicked to spectator!", 20, 1)
 		end
 	elseif AirLoadoutValue <= AirframeMaxAA and GroundLoadoutValue <= AirframeMaxAG
@@ -222,15 +223,16 @@ end
 LoadoutsMenuPlayerIDs = {}
 
 function AddLoadoutF10Check:onEvent(event)
-	if event.id == world.event.S_EVENT_BIRTH and event.initiator and event.initiator:getPlayerName() ~= nil
+	if event.id == 15 and event.initiator and event.initiator:getPlayerName() ~= nil
 		then
-			local PlayerID = event.initiator:getGroup():getID()
 			local SpawnedPlayer = event.initiator
-				if 	LoadoutsMenuPlayerIDs[PlayerID] == nil then	
-					LoadoutsMenuPlayerIDs[PlayerID] = true
-					missionCommands.addCommandForGroup(SpawnedPlayer:getGroup():getID(), "Validate Loadout", nil, LoadoutChecker, SpawnedPlayer)
-			else
-				return
+			local PlayerID = SpawnedPlayer:getGroup():getID()
+				if 	LoadoutsMenuPlayerIDs[PlayerID] == nil 
+					then	
+						LoadoutsMenuPlayerIDs[PlayerID] = true
+						missionCommands.addCommandForGroup(PlayerID, "Validate Loadout", nil, LoadoutChecker, SpawnedPlayer:getGroup())
+				else
+					return
 			end
 	end
 end
@@ -241,7 +243,7 @@ function TakeoffLoadoutCheck:onEvent(event)
 	if event.id == 3 and event.initiator and event.initiator:getPlayerName() ~= nil
 		then
 			--env.info("Player Departed, checking loadout")
-			local LoadoutCheckTarget = event.initiator
+			local LoadoutCheckTarget = event.initiator:getGroup()
 			timer.scheduleFunction(LoadoutChecker, LoadoutCheckTarget, timer.getTime() + 3)
 	end
 end
