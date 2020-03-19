@@ -1,64 +1,5 @@
 -- Operation Enduring Odyssey MOOSE OPTIONS v2 -- 
 
--- Airboss Settings Stennis --
-
---[[local airbossStennis=AIRBOSS:New("CV-74 Stennis", "CV-74 Stennis")
-airbossStennis:Start()
-
---AirbossBasicSettings-- 
-airbossStennis:SetTACAN(74, "X", "C74")
-airbossStennis:SetICLS(16, "C74")
-airbossStennis:SetLSORadio(127.500, "AM")
-airbossStennis:SetMarshalRadio(238.500, "AM")
-airbossStennis:SetRecoveryCase(1)
-airbossStennis:SetCarrierControlledArea(50)
-airbossStennis:SetDefaultPlayerSkill("Naval Aviator")
-local CarrierIncludeSet = SET_GROUP:New():FilterPrefixes({"StennisRecoveryTanker"}):FilterStart()
---local CarrierIncludeSet = SET_GROUP:New():FilterPrefixes({"StennisRecoveryTanker", "DARKSTAR"}):FilterStart()
-airbossStennis:SetSquadronAI(CarrierIncludeSet)
-
---AirbossRadioSettings--
-airbossStennis:SetSoundfilesFolder("Airboss Soundfiles/")
-airbossStennis:SetRadioRelayMarshal("MarshalRadioRelay")
-airbossStennis:SetRadioRelayLSO("LSORadioRelay")
-
---AirbossBehaviourSettings-- 
-airbossStennis:SetInitialMaxAlt(1000)
-airbossStennis:SetAirbossNiceGuy(true)
-airbossStennis:SetMaxSectionSize(4)
---airbossStennis:SetMaxMarshalStack(6)
-airbossStennis:SetMaxFlightsPerStack(2)
-airbossStennis:SetCollisionDistance(15)
-airbossStennis:SetMenuRecovery(20, 25, true, 30)
-airbossStennis:SetVoiceOversLSOByRaynor()
-airbossStennis:SetVoiceOversMarshalByFF()
-
---RecoveryTankerSettings-- 
-TexacoStennis=RECOVERYTANKER:New(UNIT:FindByName("CV-74 Stennis"), "StennisRecoveryTanker")
-TexacoStennis:SetTakeoff(SPAWN.Takeoff.Air)
-TexacoStennis:SetTACAN(16, "TXO")
-TexacoStennis:SetRadio(128.5)
---TexacoStennis:SetRecoveryAirboss(true)
-TexacoStennis:Start()
---airbossStennis:SetRecoveryTanker(TexacoStennis)
-
-AWACS Settings--
-DarkstarStennis=RECOVERYTANKER:New(UNIT:FindByName("CV-74 Stennis"), "DARKSTAR")
-DarkstarStennis:Start()
-DarkstarStennis:SetTakeoffAir()
-DarkstarStennis:SetAltitude(28000)
-DarkstarStennis:SetRadio(235.000)
-airbossStennis:SetAWACS(DarkstarStennis)
-
---AirbossTrapSheets-- 
---airbossStennis:SetAutoSave()
-
---Rescue Helo--
-RescueheloStennis=RESCUEHELO:New(UNIT:FindByName("CV-74 Stennis"), "Stennis Rescue Helo")
-RescueheloStennis:SetTakeoffAir()
-RescueheloStennis:SetRescueOff()
-RescueheloStennis:Start()]]--
-
 -- AirbasePolice-- 
 AirbasePoliceCaucasus = ATC_GROUND_PERSIANGULF:New() 
 --REMEMBER to Install Ciribob Slot Blocker for kicking --
@@ -186,7 +127,7 @@ end
 function QeshmEastMiG29A()
 	QeshmEastMiG29ASpawner = SPAWN:NewWithAlias("QeshmEastMiG29A", "Qeshm East Fulcrum A")
 	:InitLimit(2, 100)
-	:SpawnScheduled(720, 0.25)
+	:SpawnScheduled(1440, 0.25)
 	:InitRepeatOnLanding()
 	
 end
@@ -194,7 +135,7 @@ end
 function QeshmEastMiG29B()
 	QeshmEastMiG29BSpawner = SPAWN:NewWithAlias("QeshmEastMiG29B", "Qeshm East Fulcrum B")
 	:InitLimit(2, 100)
-	:SpawnScheduled(720, 0.25)
+	:SpawnScheduled(1440, 0.25)
 	:InitRepeatOnLanding()
 	
 end
@@ -205,7 +146,7 @@ end
 function QeshmWestMiG29A()
 	QeshmWestMiG29ASpawner = SPAWN:NewWithAlias("QeshmWestMiG29A", "Qeshm West Fulcrum A")
 	:InitLimit(2, 100)
-	:SpawnScheduled(720, 0.25)
+	:SpawnScheduled(1440, 0.25)
 	:InitRepeatOnLanding()
 	
 end
@@ -213,7 +154,7 @@ end
 function QeshmWestMiG29B()
 	QeshmWestMiG29BSpawner = SPAWN:NewWithAlias("QeshmWestMiG29B", "Qeshm West Fulcrum B")
 	:InitLimit(2, 100)
-	:SpawnScheduled(720, 0.25)
+	:SpawnScheduled(1440, 0.25)
 	:InitRepeatOnLanding()
 	
 end
@@ -221,7 +162,7 @@ end
 function QeshmWestMiG29C()
 	QeshmWestMiG29CSpawner = SPAWN:NewWithAlias("QeshmWestMiG29C", "Qeshm West Fulcrum C")
 	:InitLimit(2, 100)
-	:SpawnScheduled(720, 0.25)
+	:SpawnScheduled(1440, 0.25)
 	:InitRepeatOnLanding()
 	
 end
