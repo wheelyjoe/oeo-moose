@@ -394,7 +394,7 @@ local function track_wpns()
 end
 
 function SEADHandler:onEvent(event)
-  if event.id == 8 then
+  if event.id == world.event.S_EVENT_DEAD then
   --env.info("Something died")
   if event.initiator:getCategory() ~= Object.Category.Unit and event.initiator:getGroup() then  
     local eventGroup = event.initiator:getGroup()
