@@ -115,8 +115,11 @@ local RestrictedWeapons = {
 						{	["weaponName"] = "CBU-99",
 							["weaponValue"] = 5,
 						},
-						{	["weaponName"] = "CBU-107",
+						{	["weaponName"] = "CBU-105",
 							["weaponValue"] = 15,
+						},
+						{	["weaponName"] = "CBU-107",
+							["weaponValue"] = 5,
 						},
 						{	["weaponName"] = "CBU-109",
 							["weaponValue"] = 5,
@@ -142,7 +145,7 @@ local RestrictedAirframes = {
 	
 
 function LoadoutChecker(targetGroup)
-	env.info("BEGINNING LOADOUT CHECKER")
+	--env.info("BEGINNING LOADOUT CHECKER")
 	local target = targetGroup:getUnit(1)
 	local EquippedLoadout = target:getAmmo()
 	local AirLoadoutValue = 0
@@ -151,7 +154,7 @@ function LoadoutChecker(targetGroup)
 	local AirframeMaxAA = 0
 	local AirframeMaxAG = 0
 	
-	env.info("Target Type is an "..target:getTypeName())	
+	--env.info("Target Type is an "..target:getTypeName())	
 	
 	for k = 1, #RestrictedAirframes do
 		if target:getTypeName() == RestrictedAirframes[k].Type
@@ -164,37 +167,42 @@ function LoadoutChecker(targetGroup)
 		end
 	end
 
-	env.info("Target AA Max = "..AirframeMaxAA)
-	env.info("Target AG Max = "..AirframeMaxAG)
+	--env.info("Target AA Max = "..AirframeMaxAA)
+	--env.info("Target AG Max = "..AirframeMaxAG)
 	
 	for i = 1, #EquippedLoadout do
 		local TotalWeaponValue = 0
 		local EquippedWeaponCount = EquippedLoadout[i].count
 		local EquippedWeaponName = EquippedLoadout[i].desc.displayName
-		env.info("Target has "..EquippedWeaponCount.." "..EquippedWeaponName.." on board.")
+		--env.info("Target has "..EquippedWeaponCount.." "..EquippedWeaponName.." on board.")
 		for j = 1, #RestrictedWeapons do
-			if EquippedWeaponName == RestrictedWeapons[j].weaponName
+			if EquippedWeaponName == "RN-24" or EquippedWeaponName == "RN-28"
+				then
+					timer.scheduleFunction(NukeChecker, target, timer.getTime() + 1)
+					return
+			else if EquippedWeaponName == RestrictedWeapons[j].weaponName
 				then
 					local WeaponValue = RestrictedWeapons[j].weaponValue
-					env.info("Weapon Value set to "..WeaponValue)
+					--env.info("Weapon Value set to "..WeaponValue)
 					TotalWeaponValue = WeaponValue * EquippedWeaponCount
-					env.info("Total Weapon Value set to "..TotalWeaponValue)
+					--env.info("Total Weapon Value set to "..TotalWeaponValue)
+				end
 			end
 		end
-		env.info("Total Weapon Value = "..TotalWeaponValue)
+		--env.info("Total Weapon Value = "..TotalWeaponValue)
 		if EquippedWeaponName == "AIM-120C" or EquippedWeaponName == "AIM-120B" or EquippedWeaponName == "SD-10" or EquippedWeaponName == "R-77"
 			then
-				env.info("Its an AA Missile.")
+				--env.info("Its an AA Missile.")
 				AirLoadoutValue = AirLoadoutValue + TotalWeaponValue
-				env.info("Set Air Value to "..AirLoadoutValue)
+				--env.info("Set Air Value to "..AirLoadoutValue)
 		else
-				env.info("Its a Ground Weapon.")
+				--env.info("Its a Ground Weapon.")
 				GroundLoadoutValue = GroundLoadoutValue + TotalWeaponValue
-				env.info("Set Ground Value to "..GroundLoadoutValue)
+				--env.info("Set Ground Value to "..GroundLoadoutValue)
 				
 			end
-		env.info("Air Value = "..AirLoadoutValue)
-		env.info("Ground Value = "..GroundLoadoutValue)
+		--env.info("Air Value = "..AirLoadoutValue)
+		--env.info("Ground Value = "..GroundLoadoutValue)
 		end
 		
 	if	AirLoadoutValue > AirframeMaxAA or GroundLoadoutValue > AirframeMaxAG
@@ -242,7 +250,7 @@ end
 function TakeoffLoadoutCheck:onEvent(event)
 	if event.id == 3 and event.initiator and event.initiator:getPlayerName() ~= nil
 		then
-			env.info("Player Departed, checking loadout")
+			--env.info("Player Departed, checking loadout")
 			local LoadoutCheckTarget = event.initiator:getGroup()
 			timer.scheduleFunction(LoadoutChecker, LoadoutCheckTarget, timer.getTime() + 3)
 	end
@@ -259,10 +267,10 @@ end
 
 
 function PlayerKicker(target)
-	env.info("Starting Kick Check!")
+	--env.info("Starting Kick Check!")
 	if target:inAir() == false
 		then
-			env.info("Target has landed, aborting!")
+			--env.info("Target has landed, aborting!")
 			return
 	else
 		local EquippedLoadout = target:getAmmo()
@@ -272,7 +280,7 @@ function PlayerKicker(target)
 	local AirframeMaxAA = 0
 	local AirframeMaxAG = 0
 	
-	env.info("Target Type is an "..target:getTypeName())	
+	--env.info("Target Type is an "..target:getTypeName())	
 	
 	for k = 1, #RestrictedAirframes do
 		if target:getTypeName() == RestrictedAirframes[k].Type
@@ -285,50 +293,60 @@ function PlayerKicker(target)
 		end
 	end
 
-	env.info("Target AA Max = "..AirframeMaxAA)
-	env.info("Target AG Max = "..AirframeMaxAG)
+	--env.info("Target AA Max = "..AirframeMaxAA)
+	--env.info("Target AG Max = "..AirframeMaxAG)
 	
 	for i = 1, #EquippedLoadout do
 		local TotalWeaponValue = 0
 		local EquippedWeaponCount = EquippedLoadout[i].count
 		local EquippedWeaponName = EquippedLoadout[i].desc.displayName
-		env.info("Target has "..EquippedWeaponCount.." "..EquippedWeaponName.." on board.")
+		--env.info("Target has "..EquippedWeaponCount.." "..EquippedWeaponName.." on board.")
 		for j = 1, #RestrictedWeapons do
 			if EquippedWeaponName == RestrictedWeapons[j].weaponName
 				then
 					local WeaponValue = RestrictedWeapons[j].weaponValue
-					env.info("Weapon Value set to "..WeaponValue)
+					--env.info("Weapon Value set to "..WeaponValue)
 					TotalWeaponValue = WeaponValue * EquippedWeaponCount
-					env.info("Total Weapon Value set to "..TotalWeaponValue)
+					--env.info("Total Weapon Value set to "..TotalWeaponValue)
 			end
 		end
-		env.info("Total Weapon Value = "..TotalWeaponValue)
+		--env.info("Total Weapon Value = "..TotalWeaponValue)
 		if EquippedWeaponName == "AIM-120C" or EquippedWeaponName == "AIM-120B" or EquippedWeaponName == "SD-10" or EquippedWeaponName == "R-77"
 			then
-				env.info("Its an AA Missile.")
+				--env.info("Its an AA Missile.")
 				AirLoadoutValue = AirLoadoutValue + TotalWeaponValue
-				env.info("Set Air Value to "..AirLoadoutValue)
+				--env.info("Set Air Value to "..AirLoadoutValue)
 		else
-				env.info("Its a Ground Weapon.")
+				--env.info("Its a Ground Weapon.")
 				GroundLoadoutValue = GroundLoadoutValue + TotalWeaponValue
-				env.info("Set Ground Value to "..GroundLoadoutValue)
+				--env.info("Set Ground Value to "..GroundLoadoutValue)
 				
 			end
-		env.info("Air Value = "..AirLoadoutValue)
-		env.info("Ground Value = "..GroundLoadoutValue)
+		--env.info("Air Value = "..AirLoadoutValue)
+		--env.info("Ground Value = "..GroundLoadoutValue)
 		end
 		
 	if	AirLoadoutValue > AirframeMaxAA or GroundLoadoutValue > AirframeMaxAG
 			then
-				env.info("Destroying Target!")
+				--env.info("Destroying Target!")
 				trigger.action.outTextForGroup(target:getGroup():getID(), "You have been removed to spectator for flying with an invalid loadout. Please read the loadout limits in the briefing & briefing images, and use a valid loadout. You can use the F10 Menu to validate your loadout before departing.", 60, 1)
 				trigger.action.setUserFlag(target:getGroup():getName(), 100)
-				env.info("Set Flag to 100")
+				--env.info("Set Flag to 100")
 			else
 				return
 		end
 	end
 end
 
+function NukeChecker(target)
+	if target:inAir() == false
+		then
+			trigger.action.outTextForGroup(target:getGroup():getID(), "You have loaded a Nuclear Weapon. Nuclear Weapons are NOT authorised in the scope of this mission. If you depart with this weapon on board, you will be IMMEDIATELY destroyed. Remove the weapon immediately.", 60, 1)
+	else
+			trigger.action.setUserFlag(target:getGroup():getName(), 100)
+			--env.info("Kicked Player for Nukes")
+	end
+end
+	
 world.addEventHandler(TakeoffLoadoutCheck)
 world.addEventHandler(AddLoadoutF10Check)
