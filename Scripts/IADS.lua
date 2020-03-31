@@ -299,6 +299,18 @@ local function ifFoundK(foundItem, impactPoint)
   end                                                                    
 end
 
+local function ifFoundD(foundItem, impactPoint)
+  env.info("Found static in kill range")
+	  local point1 = foundItem:getPoint()
+	  point1.y = point1.y + 2
+	  local point2 = impactPoint
+	  point2.y = point2.y + 2
+	  if land.isVisible(point1, point2) == true then
+		trigger.action.explosion(point1, 10)
+	--    --env.info("Unit"..foundItem.getID().. "Destroyed by script")                         
+	  end
+end
+
 local function ifFoundS(foundItem, impactPoint)
   if foundItem:getGroup() and foundItem:getName() and foundItem:getGroup():getCategory() == 2 then
 --   --env.info("Suppresing: "..foundItem:getName())
@@ -332,16 +344,16 @@ local function track_wpns()
       wpnData.dir = wpnData.wpn:getPosition().x
       wpnData.exMass = wpnData.wpn:getDesc().warhead.explosiveMass
     else -- wpn no longer exists, must be dead.
---      --env.info("Mass of weapon warhead is " .. wpnData.exMass)
+      --env.info("Mass of weapon warhead is " .. wpnData.exMass)
       local suppressionRadius = wpnData.exMass
       local ip = land.getIP(wpnData.pos, wpnData.dir, 20)  -- terrain intersection point with weapon's nose.  Only search out 20 meters though.
       local impactPoint
       if not ip then -- use last position
         impactPoint = wpnData.pos
---        trigger.action.outText("Impact Point:\nPos X: " .. impactPoint.x .. "\nPos Z: " .. impactPoint.z, 2)
+       -- trigger.action.outText("Impact Point:\nPos X: " .. impactPoint.x .. "\nPos Z: " .. impactPoint.z, 2)
       else -- use intersection point
         impactPoint = ip
---        trigger.action.outText("Impact Point:\nPos X: " .. impactPoint.x .. "\nPos Z: " .. impactPoint.z, 2)
+       -- trigger.action.outText("Impact Point:\nPos X: " .. impactPoint.x .. "\nPos Z: " .. impactPoint.z, 2)
       end 
       local VolK =
         {
@@ -350,6 +362,15 @@ local function track_wpns()
           {
             point = impactPoint,
             radius = suppressionRadius*0.2
+          }
+        }
+	   local VolD =
+        {
+          id = world.VolumeType.SPHERE,
+          params =
+          {
+            point = impactPoint,
+            radius = suppressionRadius*0.1
           }
         }
       local VolS =
@@ -363,6 +384,7 @@ local function track_wpns()
         }                              
 --      env.warning("Begin Search")
       world.searchObjects(Object.Category.UNIT, VolK, ifFoundK,impactPoint)
+	  world.searchObjects(Object.Category.STATIC, VolD, ifFoundD,impactPoint)
       world.searchObjects(Object.Category.UNIT, VolS, ifFoundS,impactPoint)               
 --      env.warning("Finished Search")
       tracked_weapons[wpn_id_] = nil -- remove from tracked weapons first.         
@@ -374,7 +396,7 @@ end
 function SEADHandler:onEvent(event)
   if event.id == 8 then
   --env.info("Something died")
-  if event.initiator and event.initiator:getGroup() then  
+  if event.initiator:getCategory() ~= Object.Category.Unit and event.initiator:getGroup() then  
     local eventGroup = event.initiator:getGroup()
     for i, SAM in pairs(SAMSite) do    
       if eventGroup:getName() == SAM.Name then
@@ -402,12 +424,13 @@ function SEADHandler:onEvent(event)
     end   
   end  
   elseif event.id == world.event.S_EVENT_SHOT then
+	--env.info("Something has been launched")
     if event.weapon then
       local ordnance = event.weapon                  
       local ordnanceName = ordnance:getTypeName()
       local WeaponPoint = ordnance:getPoint()
       local init = event.initiator
-      if ordnanceName == "weapons.missiles.AGM_122" or ordnanceName == "weapons.missiles.AGM_88" or ordnanceName == "weapons.missiles.LD-10" or ordnanceName == "weapons.missiles.X_58" or ordnanceName == "weapons.missiles.X_25MP"then
+      if ordnanceName == "weapons.missiles.AGM_122" or ordnanceName == "weapons.missiles.AGM_88" or ordnanceName == "weapons.missiles.LD-10" or ordnanceName == "weapons.missiles.X_58" or ordnanceName == "weapons.missiles.X_25MP" then
         for i, SAM in pairs(SAMSite) do        
           if math.random(1,100) > 10 and getDistance(SAM.Location, WeaponPoint) < 65000 then      
 --            --env.info("Oh shit turn the radars off, said Ahmed, working at "..SAM.Name) 
