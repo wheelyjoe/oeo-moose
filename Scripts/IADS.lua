@@ -83,13 +83,18 @@ local function getDistance3D(point1, point2)
 
 end
 
-local function rangeOfSAM(SAMTRName)  
-
-  if SAMRangeLookupTable[SAMTRName] then
-
-    return SAMRangeLookupTable[SAMTRName]
-
-  end   
+local function rangeOfSAM(gp)  
+  
+  local maxRange = 0 
+  for i, unit in pairs(gp:getUnits()) do     
+    if unit:hasAttribute("SAM TR") and SAMRangeLookupTable[unit:getTypeName()] then  
+      local samRange  = SAMRangeLookupTable[unit:getTypeName()]
+      if maxRange < samRange then         
+        maxRange = samRange          
+      end
+    end
+  end
+    return maxRange  
 end
 
 local function disableSAM(disableArray)
@@ -240,7 +245,7 @@ local function populateLists()
             ["SAMGroup"] = gp,
             ["Type"] = samType,
             ["Location"] = gp:getUnit(1):getPoint(),
-            ["EngageRange"] = rangeOfSAM(samType),           
+            ["EngageRange"] = rangeOfSAM(gp),           
             ["ControlledBy"] = {}, 
             ["SuppressedTime"] = 0,
             ["Suppressed"] = false,
@@ -432,9 +437,11 @@ function SEADHandler:onEvent(event)
       local init = event.initiator
       if ordnanceName == "weapons.missiles.AGM_122" or ordnanceName == "weapons.missiles.AGM_88" or ordnanceName == "weapons.missiles.LD-10" or ordnanceName == "weapons.missiles.X_58" or ordnanceName == "weapons.missiles.X_25MP" then
         for i, SAM in pairs(SAMSite) do        
-          if math.random(1,100) > 10 and getDistance(SAM.Location, WeaponPoint) < 65000 then      
+          if math.random(1,100) > 10 and getDistance(SAM.Location, WeaponPoint) < 65000 then   
+            if SAM.samtype ~= "Tor 9A331" then
 --            --env.info("Oh shit turn the radars off, said Ahmed, working at "..SAM.Name) 
-            magnumHide(SAM.SAMGroup)
+               magnumHide(SAM.Type)
+            end
           end     
         end
       end
