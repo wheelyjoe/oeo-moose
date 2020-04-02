@@ -80,11 +80,11 @@ end
 -- Define Actions on Player Events --
 	
 function LivesEventHandler:onEvent(event)
-	if (event.id == 3 or event.id == 4) and event.initiator and event.initiator:getPlayerName() ~= nil and event.initiator:hasAttribute("Helicopters")
+	if (event.id == world.event.S_EVENT_TAKEOFF or event.id == world.event.S_EVENT_LAND) and event.initiator and event.initiator:getPlayerName() ~= nil and event.initiator:hasAttribute("Helicopters")
 		then
 			trigger.action.outTextForGroup(event.initiator:getGroup():getID(), "Helicopters not yet implemented into Lives System. WIP.", 10, 1)
-	elseif (event.initiator and event.id == 3 and event.place:getTypeName() == "Al Minhad AB" and event.initiator:getPlayerName() ~= nil) or (event.initiator and event.id == 3 and event.place:getTypeName() == "Al Dhafra AB" and event.initiator:getPlayerName() ~= nil) 
-		or (event.initiator and event.id == 3 and event.place:getTypeName() == "Stennis - airbase" and event.initiator:getPlayerName() ~= nil) or (event.initiator and event.id == 3 and event.place:getTypeName() == "LHA_Tarawa - airbase" and event.initiator:getPlayerName() ~= nil)
+	elseif (event.initiator and event.id == world.event.S_EVENT_TAKEOFF and event.place:getTypeName() == "Al Minhad AB" and event.initiator:getPlayerName() ~= nil) or (event.initiator and event.id == world.event.S_EVENT_TAKEOFF and event.place:getTypeName() == "Al Dhafra AB" and event.initiator:getPlayerName() ~= nil) 
+		or (event.initiator and event.id == world.event.S_EVENT_TAKEOFF and event.place:getTypeName() == "Stennis - airbase" and event.initiator:getPlayerName() ~= nil) or (event.initiator and event.id == world.event.S_EVENT_TAKEOFF and event.place:getTypeName() == "LHA_Tarawa - airbase" and event.initiator:getPlayerName() ~= nil)
 		then
 			if event.initiator:getTypeName() == "F-14B"
 				then
@@ -120,29 +120,27 @@ function LivesEventHandler:onEvent(event)
 			local LandedPilot = event.initiator
 			timer.scheduleFunction(LandingLifeCheck, LandedPilot, timer.getTime()+1)
 			--env.info("SCHEDULED CHECK FUNCTION")
-			
-	elseif event.id == 4 and event.initiator and event.initiator:getPlayerName() ~= nil
+	elseif event.id == world.event.S_EVENT_LAND and event.initiator and event.initiator:getPlayerName() ~= nil
 		then
 			--env.info("LANDING AT WRONG AIRBASE DETECTED")
 			local LandedPilot = event.initiator
 			timer.scheduleFunction(AWOLLandingLifeCheck, LandedPilot, timer.getTime()+1)
 			--env.info("SCHEDULED AWOL CHECK FUNCTION")
 
-	elseif event.id == 9 and event.initiator and event.initiator:getPlayerName() ~= nil
+	elseif event.id == world.event.S_EVENT_PILOT_DEAD and event.initiator and event.initiator:getPlayerName() ~= nil
 		then
 			PlayerDie()
 			local KilledPilot = event.initiator
 			trigger.action.outTextForGroup(KilledPilot:getGroup():getID(), "You have been killed in action. Your life has been added to the death toll. Be more careful next time!", 10, 1)
 			--env.info("DEATH EVENT RUN")
 
-	elseif event.id == 6 and event.initiator and event.initiator:getPlayerName() ~= nil and event.initiator:inAir() == true
+	elseif event.id == world.event.S_EVENT_EJECTION and event.initiator and event.initiator:getPlayerName() ~= nil and event.initiator:inAir() == true
 		then
 			PlayerMIA()
 			local EjectedPilot = event.initiator
 			--trigger.action.outTextForCoalition(2, EjectedPilot:getPlayerName().." has ejected safely and a CSAR mission is available to rescue them! Use the F10 Menu for more information. (STILL INACTIVE)", 10, 1) -- This line will be removed as Ali's CSAR Script sends the CSAR message.
 			--env.info("EJECT EVENT RUN")
-
-	elseif event.id == 21 and event.initiator and event.initiator:inAir() == true
+	elseif event.id == world.event.S_EVENT_PLAYER_ENTER_UNIT and event.initiator and event.initiator:inAir() == true
 		then
 			PlayerDie()
 			--env.info("DISCONNECT EVENT RUN")
@@ -208,7 +206,7 @@ function RestartMission()
 end
 
 function MissionFailure:onEvent(event)
-	if event.id == 9 and event.initiator and event.initiator:getPlayerName() ~= nil and LivesLost > 500
+	if event.id == world.event.S_EVENT_PILOT_DEAD and event.initiator and event.initiator:getPlayerName() ~= nil and LivesLost > 500
 		then
 			trigger.action.outTextForCoalition(2, "The death toll of Operation Enduring Odyssey has soared too high. Public opinion of the Operation has fallen and units are being pulled out of the Persian Gulf. Mission Failed.", 60, 1)
 			timer.scheduleFunction(RestartMission, {}, timer.getTime()+60)
@@ -232,7 +230,7 @@ function NewCSARMission:onEvent(event)
 	if event.initiator == nil
 		then
 			--env.info("Event Initiator was nil")
-	elseif event.id == 6 and event.initiator and event.initiator:getPlayerName() ~= nil and event.initiator:inAir() == true
+	elseif event.id == world.event.S_EVENT_EJECTION and event.initiator and event.initiator:getPlayerName() ~= nil and event.initiator:inAir() == true
 		then
 			--env.info("Ran New CSAR Mission event")
 			NumberCSARMissions = NumberCSARMissions + 1  
@@ -379,9 +377,9 @@ function CSARDropoff:onEvent(event)
 	if event.initiator == nil
 		then
 			--env.info("Event Initiator was Nil")
-	elseif (event.id == 4 and event.place:getTypeName() == "Al Minhad AB" and event.initiator:getPlayerName() ~= nil) or (event.id == 4 and event.place:getTypeName() == "Al Dhafra AB" and event.initiator:getPlayerName() ~= nil) 
-		or (event.id == 4 and event.place:getTypeName() == "Stennis - airbase" and event.initiator:getPlayerName() ~= nil) or (event.id == 4 and event.place:getTypeName() == "LHA_Tarawa - airbase" and event.initiator:getPlayerName() ~= nil) 
-		or (event.id == 4 and string.find(event.place:getName(), "FARP") and event.initiator:getPlayerName() ~= nil)
+	elseif (event.id == world.event.S_EVENT_LAND and event.place:getTypeName() == "Al Minhad AB" and event.initiator:getPlayerName() ~= nil) or (event.id == world.event.S_EVENT_LAND and event.place:getTypeName() == "Al Dhafra AB" and event.initiator:getPlayerName() ~= nil) 
+		or (event.id == world.event.S_EVENT_LAND and event.place:getTypeName() == "Stennis - airbase" and event.initiator:getPlayerName() ~= nil) or (event.id == world.event.S_EVENT_LAND and event.place:getTypeName() == "LHA_Tarawa - airbase" and event.initiator:getPlayerName() ~= nil) 
+		or (event.id == world.event.S_EVENT_LAND and string.find(event.place:getName(), "FARP") and event.initiator:getPlayerName() ~= nil)
 		then
 			--env.info("Entered CSAR Dropoff function")
 			CheckCSARonBoard = trigger.misc.getUserFlag(event.initiator:getGroup():getID().."CSARCount")

@@ -231,7 +231,7 @@ end
 LoadoutsMenuPlayerIDs = {}
 
 function AddLoadoutF10Check:onEvent(event)
-	if event.id == 15 and event.initiator and event.initiator:getPlayerName() ~= nil
+	if event.id == world.event.S_EVENT_BIRTH and event.initiator and event.initiator:getPlayerName() ~= nil
 		then
 			local SpawnedPlayer = event.initiator
 			local PlayerID = SpawnedPlayer:getGroup():getID()
@@ -248,7 +248,7 @@ end
 -- Perform Loadout Check on Player Takeoff --
 
 function TakeoffLoadoutCheck:onEvent(event)
-	if event.id == 3 and event.initiator and event.initiator:getPlayerName() ~= nil
+	if event.id == world.event.S_EVENT_TAKEOFF and event.initiator and event.initiator:getPlayerName() ~= nil
 		then
 			--env.info("Player Departed, checking loadout")
 			local LoadoutCheckTarget = event.initiator:getGroup()
