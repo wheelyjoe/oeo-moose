@@ -86,18 +86,35 @@ function LivesEventHandler:onEvent(event)
 	elseif (event.initiator and event.id == world.event.S_EVENT_TAKEOFF and event.place:getTypeName() == "Al Minhad AB" and event.initiator:getPlayerName() ~= nil) or (event.initiator and event.id == world.event.S_EVENT_TAKEOFF and event.place:getTypeName() == "Al Dhafra AB" and event.initiator:getPlayerName() ~= nil) 
 		or (event.initiator and event.id == world.event.S_EVENT_TAKEOFF and event.place:getTypeName() == "Stennis - airbase" and event.initiator:getPlayerName() ~= nil) or (event.initiator and event.id == world.event.S_EVENT_TAKEOFF and event.place:getTypeName() == "LHA_Tarawa - airbase" and event.initiator:getPlayerName() ~= nil)
 		then
-			PlayerTakeoff()
-			local DepartedPilot = event.initiator
-			trigger.action.outTextForGroup(DepartedPilot:getGroup():getID(), "You have taken off and a life has been removed from the team. Land safely at either Al Dhafra, Al Minhad or the Carrier to return your life to the pool. Good luck!", 10, 1)
-			--env.info("TAKEOFF EVENT RUN")
-	elseif event.id == world.event.S_EVENT_TAKEOFF and event.initiator and event.initiator:getPlayerName() ~= nil
+			if event.initiator:getTypeName() == "F-14B"
+				then
+					PlayerTakeoff()
+					PlayerTakeoff()
+					trigger.action.outTextForGroup(event.initiator:getGroup():getID(), "You have taken off and a life has been removed from the team for both crew members! Land safely at either Al Dhafra, Al Minhad or the Carrier to return your lives to the pool. Good luck!", 10, 1)
+			else
+				PlayerTakeoff()
+				local DepartedPilot = event.initiator
+				trigger.action.outTextForGroup(DepartedPilot:getGroup():getID(), "You have taken off and a life has been removed from the team. Land safely at either Al Dhafra, Al Minhad or the Carrier to return your life to the pool. Good luck!", 10, 1)
+				--env.info("TAKEOFF EVENT RUN")
+			end
+			
+	elseif event.id == 3 and event.initiator and event.initiator:getPlayerName() ~= nil
 		then
-			PlayerNotAWOL()
-			local NotAWOLPilot = event.initiator
-			trigger.action.outTextForGroup(NotAWOLPilot:getGroup():getID(), "You have taken off again and are no longer considered AWOL. Return to Al Dhafra, Al Minhad or the Carrier to return your life to the pool.", 30, 1)
-			AWOLPilots[event.initiator:getPlayerName()] = nil
-	elseif (event.initiator and event.id == world.event.S_EVENT_LAND and event.place:getTypeName() == "Al Minhad AB" and event.initiator:getPlayerName() ~= nil) or (event.initiator and event.id == 4 and event.place:getTypeName() == "Al Dhafra AB" and event.initiator:getPlayerName() ~= nil) 
-		or (event.initiator and event.id == world.event.S_EVENT_LAND and event.place:getTypeName() == "Stennis - airbase" and event.initiator:getPlayerName() ~= nil) or (event.initiator and event.id == world.event.S_EVENT_TAKEOFF and event.place:getTypeName() == "LHA_Tarawa - airbase" and event.initiator:getPlayerName() ~= nil)
+			if event.initiator:getTypeName() == "F-14B"
+				then
+					PlayerNotAWOL()
+					PlayerNotAWOL()
+					trigger.action.outTextForGroup(NotAWOLPilot:getGroup():getID(), "You have taken off again and are no longer considered AWOL. Return to Al Dhafra, Al Minhad or the Carrier to return your lives to the pool.", 30, 1)
+					AWOLPilots[event.initiator:getPlayerName()] = nil
+			else
+					PlayerNotAWOL()
+					local NotAWOLPilot = event.initiator
+					trigger.action.outTextForGroup(NotAWOLPilot:getGroup():getID(), "You have taken off again and are no longer considered AWOL. Return to Al Dhafra, Al Minhad or the Carrier to return your life to the pool.", 30, 1)
+					AWOLPilots[event.initiator:getPlayerName()] = nil
+			end
+			
+	elseif (event.initiator and event.id == 4 and event.place:getTypeName() == "Al Minhad AB" and event.initiator:getPlayerName() ~= nil) or (event.initiator and event.id == 4 and event.place:getTypeName() == "Al Dhafra AB" and event.initiator:getPlayerName() ~= nil) 
+		or (event.initiator and event.id == 4 and event.place:getTypeName() == "Stennis - airbase" and event.initiator:getPlayerName() ~= nil) or (event.initiator and event.id == 3 and event.place:getTypeName() == "LHA_Tarawa - airbase" and event.initiator:getPlayerName() ~= nil)
 		then 
 			--env.info("LANDING DETECTED")
 			local LandedPilot = event.initiator
@@ -123,11 +140,9 @@ function LivesEventHandler:onEvent(event)
 			local EjectedPilot = event.initiator
 			--trigger.action.outTextForCoalition(2, EjectedPilot:getPlayerName().." has ejected safely and a CSAR mission is available to rescue them! Use the F10 Menu for more information. (STILL INACTIVE)", 10, 1) -- This line will be removed as Ali's CSAR Script sends the CSAR message.
 			--env.info("EJECT EVENT RUN")
-
 	elseif event.id == world.event.S_EVENT_PLAYER_ENTER_UNIT and event.initiator and event.initiator:inAir() == true
 		then
-			PlayerLand()
-			--PlayerDie() -- Should do this but not sure about event.id 20.
+			PlayerDie()
 			--env.info("DISCONNECT EVENT RUN")
 	end
 end
@@ -138,11 +153,18 @@ function LandingLifeCheck(PilotOnGround)
 	--env.info(PilotsLife)
 		if PilotsLife > 0
 			then
+				if PilotOnGround:getTypeName() == "F-14B"
+					then
+						PlayerLand()
+						PlayerLand()
+						trigger.action.outTextForGroup(PilotOnGround:getGroup():getID(), "Welcome back! You have landed safely and your lives has been returned to the team. Great job!", 10, 1)
+				else
 				--env.info("PLAYER IS ALIVE")
 				PlayerLand()
 				trigger.action.outTextForGroup(PilotOnGround:getGroup():getID(), "Welcome back! You have landed safely and your life has been returned to the team. Great job!", 10, 1)
 				--env.info("LANDING EVENT RUN")
 			end
+		end
 end
 		
 function AWOLLandingLifeCheck(PilotOnGround)
@@ -152,6 +174,13 @@ function AWOLLandingLifeCheck(PilotOnGround)
 	--env.info(PilotsLife)
 		if PilotsLife > 0
 			then
+				if PilotOnGround:getTypeName() == "F-14B"
+					then
+						PlayerAWOL()
+						PlayerAWOL()
+						trigger.action.outTextForGroup(PilotOnGround:getGroup():getID(), "You have successfully landed, but not at a NATO base. You and your RIO are currently considered AWOL. You have 15 minutes to take off again before you are considered KIA! Return to either Al Dhafra, Al Minhad or the Carrier to return your lives to the pool.", 60, 1)
+						timer.scheduleFunction(AWOLCheck, PilotsName, timer.getTime() + 900)
+				else
 				--env.info("PLAYER IS AWOL")
 				PlayerAWOL()
 				AWOLPilots[PilotsName] = true
@@ -159,6 +188,7 @@ function AWOLLandingLifeCheck(PilotOnGround)
 				timer.scheduleFunction(AWOLCheck, PilotsName, timer.getTime() + 900)
 				--env.info("AWOL EVENT RUN")
 			end
+		end
 end
 
 function AWOLCheck(PlayerName)
