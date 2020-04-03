@@ -237,7 +237,7 @@ local function populateLists()
         isEWR = 0  
         isSAM = 0
 
-      elseif isSAM == 1 and rangeOfSAM(samType) then
+      elseif isSAM == 1 and rangeOfSAM(gp) then
 
         SAMSite[gp:getName()] = {
 
@@ -261,7 +261,7 @@ local function populateLists()
               params =
               {
                 point =  gp:getUnit(1):getPoint(),
-                raidus = rangeOfSAM(samType)
+                raidus = rangeOfSAM(gp)
               }
             }
         }
@@ -306,14 +306,14 @@ end
 
 local function ifFoundD(foundItem, impactPoint)
   env.info("Found static in kill range")
-	  local point1 = foundItem:getPoint()
-	  point1.y = point1.y + 2
-	  local point2 = impactPoint
-	  point2.y = point2.y + 2
-	  if land.isVisible(point1, point2) == true then
-		trigger.action.explosion(point1, 10)
-	--    --env.info("Unit"..foundItem.getID().. "Destroyed by script")                         
-	  end
+    local point1 = foundItem:getPoint()
+    point1.y = point1.y + 2
+    local point2 = impactPoint
+    point2.y = point2.y + 2
+    if land.isVisible(point1, point2) == true then
+    trigger.action.explosion(point1, 10)
+  --    --env.info("Unit"..foundItem.getID().. "Destroyed by script")                         
+    end
 end
 
 local function ifFoundS(foundItem, impactPoint)
@@ -335,10 +335,9 @@ end
 
 local function magnumHide(hiddenGroup)
 
-  SAMSite[hiddenGroup:getName()].HideCountdownBool = true
-  SAMSite[hiddenGroup:getName()].HideCountdown = math.random(15,25)
---  --env.info("Magnum Hide "..hiddenGroup:getName())  
-  
+    SAMSite[hiddenGroup:getName()].HideCountdownBool = true
+    SAMSite[hiddenGroup:getName()].HideCountdown = math.random(15,25)
+    --env.info("Magnum Hide "..hiddenGroup:getName())  
 end
 
 local function track_wpns()
@@ -369,7 +368,7 @@ local function track_wpns()
             radius = suppressionRadius*0.2
           }
         }
-	   local VolD =
+     local VolD =
         {
           id = world.VolumeType.SPHERE,
           params =
@@ -389,7 +388,7 @@ local function track_wpns()
         }                              
 --      env.warning("Begin Search")
       world.searchObjects(Object.Category.UNIT, VolK, ifFoundK,impactPoint)
-	  world.searchObjects(Object.Category.STATIC, VolD, ifFoundD,impactPoint)
+    world.searchObjects(Object.Category.STATIC, VolD, ifFoundD,impactPoint)
       world.searchObjects(Object.Category.UNIT, VolS, ifFoundS,impactPoint)               
 --      env.warning("Finished Search")
       tracked_weapons[wpn_id_] = nil -- remove from tracked weapons first.         
@@ -429,7 +428,7 @@ function SEADHandler:onEvent(event)
     end   
   end  
   elseif event.id == world.event.S_EVENT_SHOT then
-	--env.info("Something has been launched")
+  --env.info("Something has been launched")
     if event.weapon then
       local ordnance = event.weapon                  
       local ordnanceName = ordnance:getTypeName()
@@ -438,9 +437,9 @@ function SEADHandler:onEvent(event)
       if ordnanceName == "weapons.missiles.AGM_122" or ordnanceName == "weapons.missiles.AGM_88" or ordnanceName == "weapons.missiles.LD-10" or ordnanceName == "weapons.missiles.X_58" or ordnanceName == "weapons.missiles.X_25MP" then
         for i, SAM in pairs(SAMSite) do        
           if math.random(1,100) > 10 and getDistance(SAM.Location, WeaponPoint) < 65000 then   
-            if SAM.samtype ~= "Tor 9A331" then
---            --env.info("Oh shit turn the radars off, said Ahmed, working at "..SAM.Name) 
-               magnumHide(SAM.Type)
+            if SAM.Type ~= "Tor 9A331" then
+--              env.info(SAM.Type) 
+               magnumHide(SAM.SAMGroup)
             end
           end     
         end
