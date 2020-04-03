@@ -13,13 +13,13 @@ local RestrictedWeapons = {
 						{	["weaponName"] = "AIM-120B",
 							["weaponValue"] = 3,
 						},
-						{	["weaponName"] = "AIM-54A-Mk47", 
+						{	["weaponName"] = "AIM_54A_Mk47", 
 							["weaponValue"] = 5,
 						},
-						{	["weaponName"] = "AIM-54A-Mk60",
+						{	["weaponName"] = "AIM_54A_Mk60",
 							["weaponValue"] = 5,
 						},
-						{	["weaponName"] = "AIM-54C-Mk47",
+						{	["weaponName"] = "AIM_54C_Mk47",
 							["weaponValue"] = 5,
 						},
 						{	["weaponName"] = "SD-10",
@@ -52,16 +52,16 @@ local RestrictedWeapons = {
 						{	["weaponName"] = "AGM-62",
 							["weaponValue"] = 10,
 						},
-						{	["weaponName"] = "GB-6 HE",
+						{	["weaponName"] = "GB-6-HE",
 							["weaponValue"] = 20,
 						},
-						{	["weaponName"] = "GB-6 SFW",
+						{	["weaponName"] = "GB-6-SFW",
 							["weaponValue"] = 30,
 						},
-						{	["weaponName"] = "LS-5-600",
+						{	["weaponName"] = "LS-6-500",
 							["weaponValue"] = 30,
 						},
-						{	["weaponName"] = "C-802AKG",
+						{	["weaponName"] = "CM-802AKG",
 							["weaponValue"] = 40,
 						},
 						{	["weaponName"] = "C-802AK",
@@ -190,7 +190,7 @@ function LoadoutChecker(targetGroup)
 			end
 		end
 		--env.info("Total Weapon Value = "..TotalWeaponValue)
-		if EquippedWeaponName == "AIM-120C" or EquippedWeaponName == "AIM-120B" or EquippedWeaponName == "SD-10" or EquippedWeaponName == "R-77"
+		if EquippedWeaponName == "AIM-120B" or EquippedWeaponName == "AIM-120C" or EquippedWeaponName == "AIM_54A_Mk47" or  EquippedWeaponName == "AIM_54A_Mk60" or EquippedWeaponName == "AIM_54C_Mk47" or EquippedWeaponName == "SD-10" or EquippedWeaponName == "R-77"
 			then
 				--env.info("Its an AA Missile.")
 				AirLoadoutValue = AirLoadoutValue + TotalWeaponValue
@@ -257,11 +257,9 @@ function TakeoffLoadoutCheck:onEvent(event)
 end
 
 function KickWarning(target)
-	if target:inAir() == false
+	if target:inAir() == true
 		then
-			return
-	else
-		trigger.action.outTextForGroup(target:getGroup():getID(), "WARNING! You are still airborne with an invalid loadout! You will be removed to spectator in ONE MINUTE unless you land and re-arm!", 30, 1)
+			trigger.action.outTextForGroup(target:getGroup():getID(), "WARNING! You are still airborne with an invalid loadout! You will be removed to spectator in ONE MINUTE unless you land and re-arm!", 30, 1)
 	end
 end
 
