@@ -16,7 +16,7 @@ local SAMRangeLookupTable = {
 
     ["Hawk tr"] = 60000,
     
-    ["Tor 9A331"] = 16000
+    ["Tor 9A331"] = 100000,
 
 }
 
@@ -400,7 +400,7 @@ end
 function SEADHandler:onEvent(event)
   if event.id == world.event.S_EVENT_DEAD then
   --env.info("Something died")
-  if event.initiator:getCategory() ~= Object.Category.Unit and event.initiator:getGroup() then  
+  if event.initiator:getCategory() == Object.Category.Unit and event.initiator:getGroup() then  
     local eventGroup = event.initiator:getGroup()
     for i, SAM in pairs(SAMSite) do    
       if eventGroup:getName() == SAM.Name then
