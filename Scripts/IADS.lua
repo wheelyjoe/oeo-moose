@@ -429,22 +429,24 @@ function SEADHandler:onEvent(event)
   end  
   elseif event.id == world.event.S_EVENT_SHOT then
   --env.info("Something has been launched")
-    if event.weapon then
-      local ordnance = event.weapon                  
-      local ordnanceName = ordnance:getTypeName()
-      local WeaponPoint = ordnance:getPoint()
-      local init = event.initiator
-      if ordnanceName == "weapons.missiles.AGM_122" or ordnanceName == "weapons.missiles.AGM_88" or ordnanceName == "weapons.missiles.LD-10" or ordnanceName == "weapons.missiles.X_58" or ordnanceName == "weapons.missiles.X_25MP" then
-        for i, SAM in pairs(SAMSite) do        
-          if math.random(1,100) > 10 and getDistance(SAM.Location, WeaponPoint) < 65000 then   
-            if SAM.Type ~= "Tor 9A331" then
---               env.info(SAM.Type) 
-               magnumHide(SAM.SAMGroup)
-            end
-          end     
+    if event.weapon and event.weapon.category ~= 0 then
+      if event.weapon.MissileCategory and (event.weapon.MissleCategory == 2 or event.weapon.MissileCategory == 3 or event.weapon.MissileCategory == 4 or event.weapon.MissileCategory == 5) then
+        local ordnance = event.weapon                  
+        local ordnanceName = ordnance:getTypeName()
+        local WeaponPoint = ordnance:getPoint()
+        local init = event.initiator
+        if ordnanceName == "weapons.missiles.AGM_122" or ordnanceName == "weapons.missiles.AGM_88" or ordnanceName == "weapons.missiles.LD-10" or ordnanceName == "weapons.missiles.X_58" or ordnanceName == "weapons.missiles.X_25MP" then
+          for i, SAM in pairs(SAMSite) do        
+            if math.random(1,100) > 10 and getDistance(SAM.Location, WeaponPoint) < 120000 then   
+              if SAM.Type ~= "Tor 9A331" then
+                 magnumHide(SAM.SAMGroup)
+              end
+            end     
+          end
         end
-      end
-      tracked_weapons[event.weapon.id_] = { wpn = ordnance, init = init:getName(), pos = WeaponPoint,}                                                          
+        tracked_weapons[event.weapon.id_] = { wpn = ordnance, init = init:getName(), pos = WeaponPoint,}
+        env.info("Weapon is a: " .. ordnanceName) 
+      end                                                         
     end
   end
 end
