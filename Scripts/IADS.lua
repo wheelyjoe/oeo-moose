@@ -20,6 +20,42 @@ local SAMRangeLookupTable = {
 
 }
 
+function table.val_to_str ( v )
+  if "string" == type( v ) then
+    v = string.gsub( v, "\n", "\\n" )
+    if string.match( string.gsub(v,"[^'\"]",""), '^"+$' ) then
+      return "'" .. v .. "'"
+    end
+    return '"' .. string.gsub(v,'"', '\\"' ) .. '"'
+  else
+    return "table" == type( v ) and table.tostring( v ) or
+      tostring( v )
+  end
+end
+
+function table.key_to_str ( k )
+  if "string" == type( k ) and string.match( k, "^[_%a][_%a%d]*$" ) then
+    return k
+  else
+    return "[" .. table.val_to_str( k ) .. "]"
+  end
+end
+
+function table.tostring( tbl )
+  local result, done = {}, {}
+  for k, v in ipairs( tbl ) do
+    table.insert( result, table.val_to_str( v ) )
+    done[ k ] = true
+  end
+  for k, v in pairs( tbl ) do
+    if not done[ k ] then
+      table.insert( result,
+        table.key_to_str( k ) .. "=" .. table.val_to_str( v ) )
+    end
+  end
+  return "{" .. table.concat( result, "," ) .. "}"
+end
+
 local SAMSite = {}
 local EWRSite = {}
 local AEWAircraft = {}
@@ -230,7 +266,8 @@ local function populateLists()
             ["EWRGroup"] = gp,
             ["SAMsControlled"] = {},
             ["DetectedUnits"] = {},
-            ["Location"] = gp:getUnit(1):getPoint()
+            ["Location"] = gp:getUnit(1):getPoint(),
+            ["numUnits"] = #gp:getUnits()
 
         }
 --       --env.info("EWR Registered, named: "..gp:getName())
@@ -245,6 +282,7 @@ local function populateLists()
             ["SAMGroup"] = gp,
             ["Type"] = samType,
             ["Location"] = gp:getUnit(1):getPoint(),
+            ["numUnits"] = #gp:getUnits(),
             ["EngageRange"] = rangeOfSAM(gp),           
             ["ControlledBy"] = {}, 
             ["SuppressedTime"] = 0,
@@ -272,7 +310,7 @@ local function populateLists()
     end  
   end
   associateSAMS()
-  --env.info("Lists Populated, there are "..tablelength(EWRSite).." EWR Sites, "..tablelength(SAMSite).." SAM Sites, and "..tablelength(AEWAircraft).." AEW Aircraft. SAM sites associated with IADS network.")
+  env.info("Lists Populated, there are "..tablelength(EWRSite).." EWR Sites, "..tablelength(SAMSite).." SAM Sites, and "..tablelength(AEWAircraft).." AEW Aircraft. SAM sites associated with IADS network.")
   return timer.getTime() + 600
 end
 
@@ -285,51 +323,51 @@ end
 
 local function unSuppress(unSuppGroup)
   
---  --env.info("Removing suppressed unit from group")
+--  env.info("Removing suppressed unit from group")
   unSuppGroup:getController():setOnOff(true)
   suppressedGroups[unSuppGroup:getName()] = nil
---  --env.info("Suppressed unit removed from group")
+--  env.info("Suppressed unit removed from group")
 
 end
 
 local function ifFoundK(foundItem, impactPoint)
---  --env.info("Found unit in kill range")
+--  env.info("Found unit in kill range")
   local point1 = foundItem:getPoint()
   point1.y = point1.y + 2
   local point2 = impactPoint
   point2.y = point2.y + 2
   if land.isVisible(point1, point2) == true then
+--    env.info("Unit"..foundItem:getID().. "Destroyed by script")                         
     trigger.action.explosion(point1, 1)
---    --env.info("Unit"..foundItem.getID().. "Destroyed by script")                         
   end                                                                    
 end
 
 local function ifFoundD(foundItem, impactPoint)
-  env.info("Found static in kill range")
-    local point1 = foundItem:getPoint()
-    point1.y = point1.y + 2
-    local point2 = impactPoint
-    point2.y = point2.y + 2
-    if land.isVisible(point1, point2) == true then
+--  env.info("Found static in kill range")
+  local point1 = foundItem:getPoint()
+  point1.y = point1.y + 2
+  local point2 = impactPoint
+  point2.y = point2.y + 2
+  if land.isVisible(point1, point2) == true then
+--    env.info("Static"..foundItem:getID().. "Destroyed by script")                         
     trigger.action.explosion(point1, 10)
-  --    --env.info("Unit"..foundItem.getID().. "Destroyed by script")                         
-    end
+  end  
 end
 
 local function ifFoundS(foundItem, impactPoint)
+--  env.info("Found unit in suppression range")
   if foundItem:getGroup() and foundItem:getName() and foundItem:getGroup():getCategory() == 2 then
---   --env.info("Suppresing: "..foundItem:getName())
+--    env.info("Suppresing: "..foundItem:getName())
     local point1 = foundItem:getPoint()
     point1.y = point1.y + 5
     local point2 = impactPoint
     point2.y = point2.y + 5
+    local suppTimer = math.random(35,100)
+    local suppArray = {foundItem:getGroup(), suppTimer}
     if land.isVisible(point1, point2) == true then
-      local suppTimer = math.random(35,100)
-      local suppArray = {foundItem:getGroup(), suppTimer}
       suppress(suppArray)
- --     --env.info("Suppressing.")
-    
-    end
+--      env.info("Suppressing.")
+    end  
   end
 end
 
@@ -337,7 +375,7 @@ local function magnumHide(hiddenGroup)
 
     SAMSite[hiddenGroup:getName()].HideCountdownBool = true
     SAMSite[hiddenGroup:getName()].HideCountdown = math.random(15,25)
-    --env.info("Magnum Hide "..hiddenGroup:getName())  
+    env.info("Magnum Hide "..hiddenGroup:getName())  
 end
 
 local function track_wpns()
@@ -348,7 +386,7 @@ local function track_wpns()
       wpnData.dir = wpnData.wpn:getPosition().x
       wpnData.exMass = wpnData.wpn:getDesc().warhead.explosiveMass
     else -- wpn no longer exists, must be dead.
-      --env.info("Mass of weapon warhead is " .. wpnData.exMass)
+--      env.info("Weapon impacted, mass of weapon warhead is " .. wpnData.exMass)
       local suppressionRadius = wpnData.exMass
       local ip = land.getIP(wpnData.pos, wpnData.dir, 20)  -- terrain intersection point with weapon's nose.  Only search out 20 meters though.
       local impactPoint
@@ -388,54 +426,65 @@ local function track_wpns()
         }                              
 --      env.warning("Begin Search")
       world.searchObjects(Object.Category.UNIT, VolK, ifFoundK,impactPoint)
-    world.searchObjects(Object.Category.STATIC, VolD, ifFoundD,impactPoint)
+      world.searchObjects(Object.Category.STATIC, VolD, ifFoundD,impactPoint)
       world.searchObjects(Object.Category.UNIT, VolS, ifFoundS,impactPoint)               
 --      env.warning("Finished Search")
       tracked_weapons[wpn_id_] = nil -- remove from tracked weapons first.         
     end
   end
-  return timer.getTime() + .5
+  return timer.getTime() + 1
 end
 
 function SEADHandler:onEvent(event)
   if event.id == world.event.S_EVENT_DEAD then
-  --env.info("Something died")
-  if event.initiator:getCategory() == Object.Category.Unit and event.initiator:getGroup() then  
+--  env.info("Something died")
+--  env.info("A unit category is: " ..Object.Category.UNIT)
+  if event.initiator:getCategory() == Object.Category.UNIT and event.initiator:getGroup() then
+    env.info("It's a unit with a group, group is named: " ..event.initiator:getGroup():getName())  
     local eventGroup = event.initiator:getGroup()
-    for i, SAM in pairs(SAMSite) do    
+    for i, SAM in pairs(SAMSite) do  
       if eventGroup:getName() == SAM.Name then
-        if SAM.SAMGroup == nil then
-            --env.info("It is a SAM with no radars left")
+        env.info("It was an SAM")
+        SAM.numUnits = SAM.numUnits - 1  
+        env.info("Number of units remaining: " ..SAM.numUnits)
+        if SAM.numUnits < 1 then
+            env.info("with no radars left")
             SAMSite[SAM.Name] = nil
-            --env.info("Removed from list")
+            env.info("Removed from list")
             associateSAMS()       
         end
       end
     end 
     for i, EWR in pairs(EWRSite) do    
       if eventGroup:getName() == EWR.Name then
-        if EWR.EWRGroup == nil then      
-          --env.info("It was an EWR with no group left")
-          EWRSite[EWR.Name] = nil
-          --env.info("Removed from list")          
-          for j, SAM in pairs(SAMSite) do
-            SAM.ControlledBy[eventGroup:getName()] = nil 
-          end
+      env.info("It was an EWR")
+      EWR.numUnits = EWR.numUnits - 1
+      env.info("Number of units remaining: " ..EWR.numUnits)
+      if  EWR.numUnits < 1 then      
+        env.info("with no group left")
+        EWRSite[EWR.Name] = nil
+        env.info("Removed from list")          
+        for j, SAM in pairs(SAMSite) do
+          SAM.ControlledBy[eventGroup:getName()] = nil 
         end
+      end
       associateSAMS()    
       enableUncontrolledSAMs()
       end
     end   
   end  
   elseif event.id == world.event.S_EVENT_SHOT then
-  --env.info("Something has been launched")
-    if event.weapon and event.weapon.category ~= 0 then
-      if event.weapon.MissileCategory and (event.weapon.MissleCategory == 2 or event.weapon.MissileCategory == 3 or event.weapon.MissileCategory == 4 or event.weapon.MissileCategory == 5) then
-        local ordnance = event.weapon                  
-        local ordnanceName = ordnance:getTypeName()
-        local WeaponPoint = ordnance:getPoint()
-        local init = event.initiator
-        if ordnanceName == "weapons.missiles.AGM_122" or ordnanceName == "weapons.missiles.AGM_88" or ordnanceName == "weapons.missiles.LD-10" or ordnanceName == "weapons.missiles.X_58" or ordnanceName == "weapons.missiles.X_25MP" then
+    if event.weapon then
+--  env.info("Something has been launched")
+--  env.info("Desc is: ".. table.tostring(Weapon.getDesc(event.weapon)))
+      local ordnance = event.weapon                  
+      local ordnanceName = ordnance:getTypeName()
+      local WeaponPoint = ordnance:getPoint()
+      local WeaponDesc = event.weapon:getDesc()
+      local init = event.initiator
+      if (WeaponDesc.category == 3 or WeaponDesc.category == 2 or WeaponDesc.category == 1) and not (WeaponDesc.missileCategory == 1 or WeaponDesc.missileCategory == 2 or WeaponDesc.missileCategory == 3) then
+        if WeaponDesc.guidance == 5 then
+  --        env.info("Is ARM")
           for i, SAM in pairs(SAMSite) do        
             if math.random(1,100) > 10 and getDistance(SAM.Location, WeaponPoint) < 120000 then   
               if SAM.Type ~= "Tor 9A331" then
@@ -445,8 +494,8 @@ function SEADHandler:onEvent(event)
           end
         end
         tracked_weapons[event.weapon.id_] = { wpn = ordnance, init = init:getName(), pos = WeaponPoint,}
-        env.info("Weapon is a: " .. ordnanceName) 
-      end                                                         
+        env.info("Weapon is a: " .. ordnanceName)                                                          
+      end
     end
   end
 end
