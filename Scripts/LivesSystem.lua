@@ -80,6 +80,9 @@ end
 -- Define Actions on Player Events --
 	
 function LivesEventHandler:onEvent(event)
+
+	--env.info ("LIVES: Starting Lives Event Handler.")
+	
 	if (event.id == world.event.S_EVENT_TAKEOFF or event.id == world.event.S_EVENT_LAND) and event.initiator and event.initiator:getPlayerName() ~= nil and event.initiator:hasAttribute("Helicopters")
 		then
 			trigger.action.outTextForGroup(event.initiator:getGroup():getID(), "Helicopters not yet implemented into Lives System. WIP.", 10, 1)
@@ -95,7 +98,6 @@ function LivesEventHandler:onEvent(event)
 				PlayerTakeoff()
 				local DepartedPilot = event.initiator
 				trigger.action.outTextForGroup(DepartedPilot:getGroup():getID(), "You have taken off and a life has been removed from the team. Land safely at either Al Dhafra, Al Minhad or the Carrier to return your life to the pool. Good luck!", 10, 1)
-				--env.info("TAKEOFF EVENT RUN")
 			end
 			
 	elseif event.id == 3 and event.initiator and event.initiator:getPlayerName() ~= nil
@@ -116,41 +118,38 @@ function LivesEventHandler:onEvent(event)
 	elseif (event.initiator and event.id == 4 and event.place:getTypeName() == "Al Minhad AB" and event.initiator:getPlayerName() ~= nil) or (event.initiator and event.id == 4 and event.place:getTypeName() == "Al Dhafra AB" and event.initiator:getPlayerName() ~= nil) 
 		or (event.initiator and event.id == 4 and event.place:getTypeName() == "Stennis - airbase" and event.initiator:getPlayerName() ~= nil) or (event.initiator and event.id == 3 and event.place:getTypeName() == "LHA_Tarawa - airbase" and event.initiator:getPlayerName() ~= nil)
 		then 
-			--env.info("LANDING DETECTED")
 			local LandedPilot = event.initiator
 			timer.scheduleFunction(LandingLifeCheck, LandedPilot, timer.getTime()+1)
-			--env.info("SCHEDULED CHECK FUNCTION")
 	elseif event.id == world.event.S_EVENT_LAND and event.initiator and event.initiator:getPlayerName() ~= nil
 		then
-			--env.info("LANDING AT WRONG AIRBASE DETECTED")
 			local LandedPilot = event.initiator
 			timer.scheduleFunction(AWOLLandingLifeCheck, LandedPilot, timer.getTime()+1)
-			--env.info("SCHEDULED AWOL CHECK FUNCTION")
 
 	elseif event.id == world.event.S_EVENT_PILOT_DEAD and event.initiator and event.initiator:getPlayerName() ~= nil
 		then
 			PlayerDie()
 			local KilledPilot = event.initiator
 			trigger.action.outTextForGroup(KilledPilot:getGroup():getID(), "You have been killed in action. Your life has been added to the death toll. Be more careful next time!", 10, 1)
-			--env.info("DEATH EVENT RUN")
 
 	elseif event.id == world.event.S_EVENT_EJECTION and event.initiator and event.initiator:getPlayerName() ~= nil and event.initiator:inAir() == true
 		then
 			PlayerMIA()
 			local EjectedPilot = event.initiator
-			--trigger.action.outTextForCoalition(2, EjectedPilot:getPlayerName().." has ejected safely and a CSAR mission is available to rescue them! Use the F10 Menu for more information. (STILL INACTIVE)", 10, 1) -- This line will be removed as Ali's CSAR Script sends the CSAR message.
-			--env.info("EJECT EVENT RUN")
+			
 	elseif event.id == world.event.S_EVENT_PLAYER_ENTER_UNIT and event.initiator and event.initiator:inAir() == true
 		then
 			PlayerDie()
-			--env.info("DISCONNECT EVENT RUN")
 	end
+	
+	--env.info("LIVES: Ending Lives Event Handler.")
+	
 end
 
 function LandingLifeCheck(PilotOnGround)
-	--env.info("RUNNING LIFE CHECK")
+	
+	--env.info("LIVES: Starting Landing Life Checker.")
+	
 	local PilotsLife = PilotOnGround:getLife()
-	--env.info(PilotsLife)
 		if PilotsLife > 0
 			then
 				if PilotOnGround:getTypeName() == "F-14B"
@@ -159,19 +158,21 @@ function LandingLifeCheck(PilotOnGround)
 						PlayerLand()
 						trigger.action.outTextForGroup(PilotOnGround:getGroup():getID(), "Welcome back! You have landed safely and your lives has been returned to the team. Great job!", 10, 1)
 				else
-				--env.info("PLAYER IS ALIVE")
 				PlayerLand()
 				trigger.action.outTextForGroup(PilotOnGround:getGroup():getID(), "Welcome back! You have landed safely and your life has been returned to the team. Great job!", 10, 1)
-				--env.info("LANDING EVENT RUN")
 			end
 		end
+	
+	--env.info("LIVES: Ending Landing Life Checker.")
+	
 end
 		
 function AWOLLandingLifeCheck(PilotOnGround)
-	--env.info("RUNNING AWOL LIFE CHECK")
+
+	--env.info("LIVES: Starting AWOL Life Checker.")
+	
 	local PilotsLife = PilotOnGround:getLife()
 	local PilotsName = PilotOnGround:getPlayerName()
-	--env.info(PilotsLife)
 		if PilotsLife > 0
 			then
 				if PilotOnGround:getTypeName() == "F-14B"
@@ -181,14 +182,15 @@ function AWOLLandingLifeCheck(PilotOnGround)
 						trigger.action.outTextForGroup(PilotOnGround:getGroup():getID(), "You have successfully landed, but not at a NATO base. You and your RIO are currently considered AWOL. You have 15 minutes to take off again before you are considered KIA! Return to either Al Dhafra, Al Minhad or the Carrier to return your lives to the pool.", 60, 1)
 						timer.scheduleFunction(AWOLCheck, PilotsName, timer.getTime() + 900)
 				else
-				--env.info("PLAYER IS AWOL")
 				PlayerAWOL()
 				AWOLPilots[PilotsName] = true
 				trigger.action.outTextForGroup(PilotOnGround:getGroup():getID(), "You have successfully landed, but not at a NATO base. You are currently considered AWOL. You have 15 minutes to take off again before you are considered KIA! Return to either Al Dhafra, Al Minhad or the Carrier to return your life to the pool.", 60, 1)
 				timer.scheduleFunction(AWOLCheck, PilotsName, timer.getTime() + 900)
-				--env.info("AWOL EVENT RUN")
 			end
 		end
+		
+	--env.info("LIVES: Ending AWOL Life Checker.")
+	
 end
 
 function AWOLCheck(PlayerName)
@@ -227,12 +229,14 @@ ActiveCSARFrequencies = {}
 
 
 function NewCSARMission:onEvent(event)
+
+	--env.info("LIVES: Starting New CSAR Mission Function.")
+	
 	if event.initiator == nil
 		then
-			--env.info("Event Initiator was nil")
+			return
 	elseif event.id == world.event.S_EVENT_EJECTION and event.initiator and event.initiator:getPlayerName() ~= nil and event.initiator:inAir() == true
 		then
-			--env.info("Ran New CSAR Mission event")
 			NumberCSARMissions = NumberCSARMissions + 1  
 			local EjectedPlayer = event.initiator
 			local EjectedPlayerVec3 = EjectedPlayer:getPoint()
@@ -260,12 +264,16 @@ function NewCSARMission:onEvent(event)
 			trigger.action.outTextForCoalition(2, EjectedPlayer:getPlayerName().." has been hit and is going down! Initial reports suggest a good chute, and a CSAR mission is being readied to rescue him. Use the F10 menu for more information.", 20, 1)
 			local foundObjects = {}
 			timer.scheduleFunction(CSARAreaSearch, {DownedPilotUnit, foundObjects, DownedPilot, FreqForMessage}, timer.getTime()+ 10)
-			--env.info("Scheduled CSAR Searching Function")
 		end
+		
+	--env.info("LIVES: Ending New CSAR Mission Function.")
+	
 end
 
 function CSARAreaSearch(ParamTable)
-	--env.info("Entered CSAR Search Function")
+
+	--env.info("LIVES: Starting CSAR Search Function.")
+	
 	local Pilot = ParamTable[1]
 	local foundObjects = ParamTable[2]
 	local PilotPosition = Pilot:getPoint()
@@ -279,12 +287,10 @@ function CSARAreaSearch(ParamTable)
 			}
 		}
 	world.searchObjects(Object.Category.UNIT, CSARSearchZone, ifFoundUnit, foundObjects)
-	--env.info("Search of CSAR Zone complete, found " ..#foundObjects)
 	if #foundObjects >= 1
 		then
 			foundObjectsName = foundObjects[1]
 			PlayerCSARCount = trigger.misc.getUserFlag(foundObjectsName.."CSARCount")
-			--env.info("Found something, running CSAR Pickup event")
 				if PlayerCSARCount < 1
 					then
 						trigger.action.setUserFlag(foundObjectsName.."CSARCount", 1)
@@ -302,7 +308,6 @@ function CSARAreaSearch(ParamTable)
 									end
 							end
 						local FirstFlagCheck = trigger.misc.getUserFlag(foundObjectsName.."CSARCount")
-						--env.info("Completed Pickup Function")
 				elseif PlayerCSARCount == 1
 					then
 						trigger.action.setUserFlag(foundObjectsName.."CSARCount", 2)
@@ -320,7 +325,6 @@ function CSARAreaSearch(ParamTable)
 									end
 							end
 						local SecondFlagCheck = trigger.misc.getUserFlag(foundObjectsName.."CSARCount")
-						--env.info("Completed Pickup Function")
 				elseif PlayerCSARCount == 2
 					then
 						trigger.action.setUserFlag(foundObjectsName.."CSARCount", 3)
@@ -338,7 +342,6 @@ function CSARAreaSearch(ParamTable)
 									end
 							end
 						local ThirdFlagCheck = trigger.misc.getUserFlag(foundObjectsName.."CSARCount")
-						--env.info("Completed Pickup Function")
 				elseif PlayerCSARCount == 3
 					then
 						trigger.action.setUserFlag(foundObjectsName.."CSARCount", 4)
@@ -355,15 +358,16 @@ function CSARAreaSearch(ParamTable)
 									end
 							end
 						local FourthFlagCheck = trigger.misc.getUserFlag(foundObjectsName.."CSARCount")
-						--env.info("Completed Pickup Function")
 				elseif PlayerCSARCount > 3
 					then
 						trigger.action.outTextForGroup(foundObjectsName, "Your heli is already full! You must return to base before collecting any more pilots!", 20, 1)
 				end
 		else
-			--env.info("CSAR Found nothing, returning 30")
 			return timer.getTime() + 30
 	end
+	
+	--env.info("LIVES: Ending CSAR Search function.")
+	
 end
 
 function ifFoundUnit(foundItem, val)
@@ -374,26 +378,29 @@ function ifFoundUnit(foundItem, val)
 end
 
 function CSARDropoff:onEvent(event)
+
+	--env.info("LIVES: Starting CSAR Dropoff Function.")
+	
 	if event.initiator == nil
 		then
-			--env.info("Event Initiator was Nil")
+			return
 	elseif (event.id == world.event.S_EVENT_LAND and event.place:getTypeName() == "Al Minhad AB" and event.initiator:getPlayerName() ~= nil) or (event.id == world.event.S_EVENT_LAND and event.place:getTypeName() == "Al Dhafra AB" and event.initiator:getPlayerName() ~= nil) 
 		or (event.id == world.event.S_EVENT_LAND and event.place:getTypeName() == "Stennis - airbase" and event.initiator:getPlayerName() ~= nil) or (event.id == world.event.S_EVENT_LAND and event.place:getTypeName() == "LHA_Tarawa - airbase" and event.initiator:getPlayerName() ~= nil) 
 		or (event.id == world.event.S_EVENT_LAND and string.find(event.place:getName(), "FARP") and event.initiator:getPlayerName() ~= nil)
 		then
-			--env.info("Entered CSAR Dropoff function")
 			CheckCSARonBoard = trigger.misc.getUserFlag(event.initiator:getGroup():getID().."CSARCount")
 				if CheckCSARonBoard > 0
 					then
-						--env.info("Running CSAR Dropoff Changes")
 						LivesRemaining = LivesRemaining + CheckCSARonBoard
 						LivesMIA = LivesMIA - CheckCSARonBoard
 						trigger.action.outTextForGroup(event.initiator:getGroup():getID(), "You have successfully returned "..CheckCSARonBoard.." pilots to base! Remaining lives have been adjusted.", 30, 1)
 						CheckCSARonBoard = 0
 						trigger.action.setUserFlag(event.initiator:getGroup():getID().."CSARCount", 0)
-						--env.info("Finished Dropoff Changes")
 				end
 	end
+	
+	--env.info("LIVES: Ending CSAR Dropoff Function.")
+	
 end
 
 -- F10 Menu Additions --

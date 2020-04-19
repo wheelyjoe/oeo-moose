@@ -1,7 +1,6 @@
--- Operation Enduring Odyssey Loadouts Limitation Script --#
+-- Operation Enduring Odyssey Loadouts Limitation Script --
 
-TakeoffLoadoutCheck = {}
-AddLoadoutF10Check = {}
+loadoutsEventHandler = {}
 
 -- Define Values for all Limited Ordnance --
 
@@ -151,7 +150,7 @@ local RestrictedAirframes = {
 	
 
 function LoadoutChecker(targetGroup)
-	--env.info("BEGINNING LOADOUT CHECKER")
+	env.info("LOADOUTS: Starting loadout checker.")
 	local target = targetGroup:getUnit(1)
 	local EquippedLoadout = target:getAmmo()
 	local AirLoadoutValue = 0
@@ -159,9 +158,7 @@ function LoadoutChecker(targetGroup)
 	local WeaponValue = 0
 	local AirframeMaxAA = 0
 	local AirframeMaxAG = 0
-	
-	--env.info("Target Type is an "..target:getTypeName())	
-	
+		
 	for k = 1, #RestrictedAirframes do
 		if target:getTypeName() == RestrictedAirframes[k].Type
 			then
@@ -172,15 +169,11 @@ function LoadoutChecker(targetGroup)
 				AirframeMaxAG = RestrictedAirframes["Default"].AGMax
 		end
 	end
-
-	--env.info("Target AA Max = "..AirframeMaxAA)
-	--env.info("Target AG Max = "..AirframeMaxAG)
 	
 	for i = 1, #EquippedLoadout do
 		local TotalWeaponValue = 0
 		local EquippedWeaponCount = EquippedLoadout[i].count
 		local EquippedWeaponName = EquippedLoadout[i].desc.displayName
-		--env.info("Target has "..EquippedWeaponCount.." "..EquippedWeaponName.." on board.")
 		for j = 1, #RestrictedWeapons do
 			if EquippedWeaponName == "RN-24" or EquippedWeaponName == "RN-28"
 				then
@@ -189,26 +182,16 @@ function LoadoutChecker(targetGroup)
 			else if EquippedWeaponName == RestrictedWeapons[j].weaponName
 				then
 					local WeaponValue = RestrictedWeapons[j].weaponValue
-					--env.info("Weapon Value set to "..WeaponValue)
 					TotalWeaponValue = WeaponValue * EquippedWeaponCount
-					--env.info("Total Weapon Value set to "..TotalWeaponValue)
 				end
 			end
 		end
-		--env.info("Total Weapon Value = "..TotalWeaponValue)
 		if EquippedWeaponName == "AIM-120B" or EquippedWeaponName == "AIM-120C" or EquippedWeaponName == "AIM_54A_Mk47" or  EquippedWeaponName == "AIM_54A_Mk60" or EquippedWeaponName == "AIM_54C_Mk47" or EquippedWeaponName == "SD-10" or EquippedWeaponName == "R-77"
 			then
-				--env.info("Its an AA Missile.")
 				AirLoadoutValue = AirLoadoutValue + TotalWeaponValue
-				--env.info("Set Air Value to "..AirLoadoutValue)
 		else
-				--env.info("Its a Ground Weapon.")
-				GroundLoadoutValue = GroundLoadoutValue + TotalWeaponValue
-				--env.info("Set Ground Value to "..GroundLoadoutValue)
-				
+				GroundLoadoutValue = GroundLoadoutValue + TotalWeaponValue		
 			end
-		--env.info("Air Value = "..AirLoadoutValue)
-		--env.info("Ground Value = "..GroundLoadoutValue)
 		end
 		
 	if	AirLoadoutValue > AirframeMaxAA or GroundLoadoutValue > AirframeMaxAG
@@ -230,37 +213,9 @@ function LoadoutChecker(targetGroup)
 				trigger.action.outTextForGroup(target:getGroup():getID(), "Current A/A Weaponry Cost = "..AirLoadoutValue.."/"..AirframeMaxAA..".\nCurrent A/G Weaponry Cost = "..GroundLoadoutValue.."/"..AirframeMaxAG..".\nYour current loadout is valid, you may depart and fly your mission. Good luck!", 20, 1)
 			end
 		end
+	env.info("LOADOUTS: Ending Loadout Checker.")
 end
 
--- Create F10 Entry for Players to Check Current Loadout --
-
-LoadoutsMenuPlayerIDs = {}
-
-function AddLoadoutF10Check:onEvent(event)
-	if event.id == world.event.S_EVENT_BIRTH and event.initiator and event.initiator:getPlayerName() ~= nil
-		then
-			local SpawnedPlayer = event.initiator
-			local PlayerID = SpawnedPlayer:getGroup():getID()
-				if 	LoadoutsMenuPlayerIDs[PlayerID] == nil 
-					then	
-						LoadoutsMenuPlayerIDs[PlayerID] = true
-						missionCommands.addCommandForGroup(PlayerID, "Validate Loadout", nil, LoadoutChecker, SpawnedPlayer:getGroup())
-				else
-					return
-			end
-	end
-end
-
--- Perform Loadout Check on Player Takeoff --
-
-function TakeoffLoadoutCheck:onEvent(event)
-	if event.id == world.event.S_EVENT_TAKEOFF and event.initiator and event.initiator:getPlayerName() ~= nil
-		then
-			--env.info("Player Departed, checking loadout")
-			local LoadoutCheckTarget = event.initiator:getGroup()
-			timer.scheduleFunction(LoadoutChecker, LoadoutCheckTarget, timer.getTime() + 3)
-	end
-end
 
 function KickWarning(target)
 	if target:inAir() == true
@@ -271,10 +226,11 @@ end
 
 
 function PlayerKicker(target)
-	--env.info("Starting Kick Check!")
+	
+	env.info("LOADOUTS: Starting Kick Check Function.")
+	
 	if target:inAir() == false
 		then
-			--env.info("Target has landed, aborting!")
 			return
 	else
 		local EquippedLoadout = target:getAmmo()
@@ -283,9 +239,7 @@ function PlayerKicker(target)
 	local WeaponValue = 0
 	local AirframeMaxAA = 0
 	local AirframeMaxAG = 0
-	
-	--env.info("Target Type is an "..target:getTypeName())	
-	
+		
 	for k = 1, #RestrictedAirframes do
 		if target:getTypeName() == RestrictedAirframes[k].Type
 			then
@@ -296,50 +250,37 @@ function PlayerKicker(target)
 				AirframeMaxAG = RestrictedAirframes["Default"].AGMax
 		end
 	end
-
-	--env.info("Target AA Max = "..AirframeMaxAA)
-	--env.info("Target AG Max = "..AirframeMaxAG)
 	
 	for i = 1, #EquippedLoadout do
 		local TotalWeaponValue = 0
 		local EquippedWeaponCount = EquippedLoadout[i].count
 		local EquippedWeaponName = EquippedLoadout[i].desc.displayName
-		--env.info("Target has "..EquippedWeaponCount.." "..EquippedWeaponName.." on board.")
 		for j = 1, #RestrictedWeapons do
 			if EquippedWeaponName == RestrictedWeapons[j].weaponName
 				then
 					local WeaponValue = RestrictedWeapons[j].weaponValue
-					--env.info("Weapon Value set to "..WeaponValue)
 					TotalWeaponValue = WeaponValue * EquippedWeaponCount
-					--env.info("Total Weapon Value set to "..TotalWeaponValue)
 			end
 		end
-		--env.info("Total Weapon Value = "..TotalWeaponValue)
 		if EquippedWeaponName == "AIM-120C" or EquippedWeaponName == "AIM-120B" or EquippedWeaponName == "SD-10" or EquippedWeaponName == "R-77"
 			then
-				--env.info("Its an AA Missile.")
 				AirLoadoutValue = AirLoadoutValue + TotalWeaponValue
-				--env.info("Set Air Value to "..AirLoadoutValue)
 		else
-				--env.info("Its a Ground Weapon.")
 				GroundLoadoutValue = GroundLoadoutValue + TotalWeaponValue
-				--env.info("Set Ground Value to "..GroundLoadoutValue)
-				
 			end
-		--env.info("Air Value = "..AirLoadoutValue)
-		--env.info("Ground Value = "..GroundLoadoutValue)
 		end
 		
 	if	AirLoadoutValue > AirframeMaxAA or GroundLoadoutValue > AirframeMaxAG
 			then
-				--env.info("Destroying Target!")
 				trigger.action.outTextForGroup(target:getGroup():getID(), "You have been removed to spectator for flying with an invalid loadout. Please read the loadout limits in the briefing & briefing images, and use a valid loadout. You can use the F10 Menu to validate your loadout before departing.", 60, 1)
 				trigger.action.setUserFlag(target:getGroup():getName(), 100)
-				--env.info("Set Flag to 100")
 			else
 				return
 		end
 	end
+	
+	env.info("LOADOUTS: Ending kick check function.")
+	
 end
 
 function NukeChecker(target)
@@ -348,9 +289,30 @@ function NukeChecker(target)
 			trigger.action.outTextForGroup(target:getGroup():getID(), "You have loaded a Nuclear Weapon. Nuclear Weapons are NOT authorised in the scope of this mission. If you depart with this weapon on board, you will be IMMEDIATELY destroyed. Remove the weapon immediately.", 60, 1)
 	else
 			trigger.action.setUserFlag(target:getGroup():getName(), 100)
-			--env.info("Kicked Player for Nukes")
 	end
 end
+
+LoadoutsMenuPlayerIDs = {}
+
+function loadoutsEventHandler:onEvent(event)
+	if event.id == world.event.S_EVENT_TAKEOFF and event.initiator and event.initiator:getPlayerName() ~= nil
+		then
+			local LoadoutCheckTarget = event.initiator:getGroup()
+			timer.scheduleFunction(LoadoutChecker, LoadoutCheckTarget, timer.getTime() + 3)
+			
+	elseif event.id == world.event.S_EVENT_BIRTH and event.initiator and event.initiator:getPlayerName() ~= nil
+		then
+			local SpawnedPlayer = event.initiator
+			local PlayerID = SpawnedPlayer:getGroup():getID()
+				if 	LoadoutsMenuPlayerIDs[PlayerID] == nil 
+					then	
+						LoadoutsMenuPlayerIDs[PlayerID] = true
+						missionCommands.addCommandForGroup(PlayerID, "Validate Loadout", nil, LoadoutChecker, SpawnedPlayer:getGroup())
+				else
+					return
+				end
+	end
+end
+
 	
-world.addEventHandler(TakeoffLoadoutCheck)
-world.addEventHandler(AddLoadoutF10Check)
+world.addEventHandler(loadoutsEventHandler)
