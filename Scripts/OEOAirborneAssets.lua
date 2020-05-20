@@ -18,6 +18,14 @@ local function logisticAssets()
 	  :InitRepeatOnLanding()
 	  
 	 end
+	 
+	local function TEXACO()
+	  TEXACOSpawner = SPAWN:New("TEXACO")
+	  :InitLimit(1, 10)
+	  :SpawnScheduled(10, 0)
+	  :InitRepeatOnLanding()
+	  
+	 end
 
 	local function MAGIC()
 	  MAGICSpawner = SPAWN:New("MAGIC")
@@ -45,6 +53,7 @@ local function logisticAssets()
 	 
 	ARCO()
 	SHELL()
+	TEXACO()
 	MAGIC()
 	DARKSTAR()
 	IranAWACS()
