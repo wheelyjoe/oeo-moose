@@ -88,6 +88,7 @@ function LivesEventHandler:onEvent(event)
 			trigger.action.outTextForGroup(event.initiator:getGroup():getID(), "Helicopters not yet implemented into Lives System. WIP.", 10, 1)
 	elseif (event.initiator and event.id == world.event.S_EVENT_TAKEOFF and event.place:getTypeName() == "Al Minhad AB" and event.initiator:getPlayerName() ~= nil) or (event.initiator and event.id == world.event.S_EVENT_TAKEOFF and event.place:getTypeName() == "Al Dhafra AB" and event.initiator:getPlayerName() ~= nil) 
 		or (event.initiator and event.id == world.event.S_EVENT_TAKEOFF and event.place:getTypeName() == "Stennis - airbase" and event.initiator:getPlayerName() ~= nil) or (event.initiator and event.id == world.event.S_EVENT_TAKEOFF and event.place:getTypeName() == "LHA_Tarawa - airbase" and event.initiator:getPlayerName() ~= nil)
+		or (event.initiator and event.id == world.event.S_EVENT_TAKEOFF and event.place:getTypeName() == "CVN_73 - airbase" and event.initiator:getPlayerName() ~= nil)
 		then
 			if event.initiator:getTypeName() == "F-14B"
 				then
