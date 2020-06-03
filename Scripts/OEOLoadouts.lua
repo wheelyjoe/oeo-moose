@@ -64,7 +64,7 @@ local RestrictedWeapons = {
 							["weaponValue"] = 25,
 						},
 						{	["weaponName"] = "CM-802AKG",
-							["weaponValue"] = 35,
+							["weaponValue"] = 30,
 						},
 						{	["weaponName"] = "C-802AK",
 							["weaponValue"] = 15,
@@ -132,6 +132,9 @@ local RestrictedWeapons = {
 						{	["weaponName"] = "Mk-20",
 							["weaponValue"] = 5,
 						},
+						{	["weaponName"] = "AGM-84E SLAM",
+							["weaponValue"] = 30,
+						},
 }
 
 -- Define Maximum Allowed Values for all Airframes --
@@ -174,6 +177,7 @@ function LoadoutChecker(targetGroup)
 		local TotalWeaponValue = 0
 		local EquippedWeaponCount = EquippedLoadout[i].count
 		local EquippedWeaponName = EquippedLoadout[i].desc.displayName
+		--env.info("Weapon is a(n) "..EquippedWeaponName)
 		for j = 1, #RestrictedWeapons do
 			if EquippedWeaponName == "RN-24" or EquippedWeaponName == "RN-28"
 				then
