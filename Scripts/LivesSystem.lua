@@ -117,7 +117,8 @@ function LivesEventHandler:onEvent(event)
 			end
 			
 	elseif (event.initiator and event.id == 4 and event.place:getTypeName() == "Al Minhad AB" and event.initiator:getPlayerName() ~= nil) or (event.initiator and event.id == 4 and event.place:getTypeName() == "Al Dhafra AB" and event.initiator:getPlayerName() ~= nil) 
-		or (event.initiator and event.id == 4 and event.place:getTypeName() == "Stennis - airbase" and event.initiator:getPlayerName() ~= nil) or (event.initiator and event.id == 3 and event.place:getTypeName() == "LHA_Tarawa - airbase" and event.initiator:getPlayerName() ~= nil)
+		or (event.initiator and event.id == 4 and event.place:getTypeName() == "Stennis - airbase" and event.initiator:getPlayerName() ~= nil) or (event.initiator and event.id == 3 and event.place:getTypeName() == "LHA_Tarawa - airbase" and event.initiator:getPlayerName() ~= nil) 
+		or (event.initiator and event.id == 3 and event.place:getTypeName() == "CVN_73 - airbase" and event.initiator:getPlayerName() ~= nil)
 		then 
 			local LandedPilot = event.initiator
 			timer.scheduleFunction(LandingLifeCheck, LandedPilot, timer.getTime()+1)

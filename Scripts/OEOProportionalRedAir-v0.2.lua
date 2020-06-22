@@ -2,11 +2,13 @@
 
 -- Define Required Variables --
 
-local redVariationValue = math.random(1, 6)
+local redVariationValue = math.random(1, 3)
 
 local initPictureComplete = false
 
 -- Define Flights Using MOOSE --
+
+-- ISLANDS --
 
 local function VarAIsl21()
 		VarAIsl21 = SPAWN:New("VarAIsl21")
@@ -22,20 +24,60 @@ local function VarBIsl21()
 		:InitRepeatOnLanding()
 end
 	
-local function VarAIslF4()
-		VarAIslF4 = SPAWN:New("VarAIslF4")
+local function VarAIslF5()
+		VarAIslF5 = SPAWN:New("VarAIslF5")
 		:InitLimit(2, 30)
 		:SpawnScheduled(1800, 0.25)
 		:InitRepeatOnLanding()
 end
 	
-local function VarBIslF4()
-		VarBIslF4 = SPAWN:New("VarBIslF4")
+local function VarBIslF5()
+		VarBIslF5 = SPAWN:New("VarBIslF5")
 		:InitLimit(2, 30)
 		:SpawnScheduled(1800, 0.25)
 		:InitRepeatOnLanding()
 end
-	
+
+local function VarAIsl22()
+		VarAIsl22 = SPAWN:New("VarAIsl22")
+		:InitLimit(2, 30)
+		:SpawnScheduled(1800, 0.25)
+		:InitRepeatOnLanding()
+end
+
+local function VarBIsl22()
+		VarBIsl22 = SPAWN:New("VarBIsl22")
+		:InitLimit(2, 30)
+		:SpawnScheduled(1800, 0.25)
+		:InitRepeatOnLanding()
+end
+
+local function ScrambleIslandsF5()
+	ScrambleIslandsF5 = SPAWN:New("ScrambleIslandsF5")
+	:InitLimit (2, 16)
+	:InitDelayOn()
+	:SpawnScheduled(1800, 0.25)
+	:InitRepeatOnLanding()
+end
+
+local function ScrambleIslands21()
+	ScrambleIslands21 = SPAWN:New("ScrambleIslands21")
+	:InitLimit (2, 16)
+	:InitDelayOn()
+	:SpawnScheduled(1800, 0.25)
+	:InitRepeatOnLanding()
+end
+
+local function ScrambleIslands22()
+	ScrambleIslands22 = SPAWN:New("ScrambleIslands22")
+	:InitLimit (2, 16)
+	:InitDelayOn()
+	:SpawnScheduled(1800, 0.25)
+	:InitRepeatOnLanding()
+end
+
+-- JASK --
+
 local function VarAJask21()
 		VarAJask21 = SPAWN:New("VarAJask21")
 		:InitLimit(2, 30)
@@ -49,20 +91,36 @@ local function VarBJask21()
 		:SpawnScheduled(1800, 0.25)
 		:InitRepeatOnLanding()
 end
-	
-local function VarAJaskF4()
-		VarAJaskF4 = SPAWN:New("VarAJaskF4")
+
+local function VarAJask22()
+		VarAJask22 = SPAWN:New("VarAJask22")
 		:InitLimit(2, 30)
 		:SpawnScheduled(1800, 0.25)
 		:InitRepeatOnLanding()
 end
 	
-local function VarBJaskF4()
-		VarBJaskF4 = SPAWN:New("VarBJaskF4")
+local function VarBJask22()
+		VarBJask22 = SPAWN:New("VarBJask22")
 		:InitLimit(2, 30)
 		:SpawnScheduled(1800, 0.25)
 		:InitRepeatOnLanding()
 end
+	
+local function VarAJaskF5()
+		VarAJaskF5 = SPAWN:New("VarAJaskF5")
+		:InitLimit(2, 30)
+		:SpawnScheduled(1800, 0.25)
+		:InitRepeatOnLanding()
+end
+	
+local function VarBJaskF5()
+		VarBJaskF5 = SPAWN:New("VarBJaskF5")
+		:InitLimit(2, 30)
+		:SpawnScheduled(1800, 0.25)
+		:InitRepeatOnLanding()
+end
+
+-- QESHM/KHASAB --
 
 local function VarAQWF4()
 		VarAQWF4 = SPAWN:New("VarAQWF4")
@@ -77,21 +135,7 @@ local function VarBQWF4()
 		:SpawnScheduled(1800, 0.25)
 		:InitRepeatOnLanding()
 end
-	
-local function VarAQW29()
-		VarAQW29 = SPAWN:New("VarAQW29")
-		:InitLimit(2, 30)
-		:SpawnScheduled(1800, 0.25)
-		:InitRepeatOnLanding()
-end
-	
-local function VarBQW29()
-		VarBQW29 = SPAWN:New("VarBQW29")
-		:InitLimit(2, 30)
-		:SpawnScheduled(1800, 0.25)
-		:InitRepeatOnLanding()
-end
-	
+		
 local function VarAQEF4()
 		VarAQWE4 = SPAWN:New("VarAQEF4")
 		:InitLimit(2, 30)
@@ -106,19 +150,15 @@ local function VarBQEF4()
 		:InitRepeatOnLanding()
 end
 
-local function VarAQE29()
-		VarAQE29 = SPAWN:New("VarAQE29")
-		:InitLimit(2, 30)
-		:SpawnScheduled(1800, 0.25)
-		:InitRepeatOnLanding()
+local function ScrambleKhasabF4()
+	ScrambleKhasabF4 = SPAWN:New("ScrambleKhasabF4")
+	:InitLimit (2, 16)
+	:InitDelayOn()
+	:SpawnScheduled(1800, 0.25)
+	:InitRepeatOnLanding()
 end
-	
-local function VarBQE29()
-		VarBQE29 = SPAWN:New("VarBQE29")
-		:InitLimit(2, 30)
-		:SpawnScheduled(1800, 0.25)
-		:InitRepeatOnLanding()
-end
+
+-- MAINLAND NORTH --
 
 local function TomcatsA()
 		TomcatsASpawner = SPAWN:NewWithAlias("IranTomcatA", "Iran Tomcat A")
@@ -148,6 +188,8 @@ local function TomcatsD()
 		:InitRepeatOnLanding()		
 end
 	
+-- MAINLAND SOUTH --
+	
 local function InlandFulcrumsA()
 		InlandFulcrumsA = SPAWN:New("InlandFulcrumsA")
 		:InitLimit(2, 30)
@@ -176,83 +218,30 @@ local function InlandFulcrumsD()
 		:InitRepeatOnLanding()
 end
 
-local function ScrambleIslandsF4()
-	ScrambleIslandsF4 = SPAWN:New("ScrambleIslandsF4")
-	:InitLimit (2, 16)
-	:InitDelayOn()
-	:SpawnScheduled(1800, 0.25)
-	:InitRepeatOnLanding()
-end
-
-local function ScrambleIslands21()
-	ScrambleIslands21 = SPAWN:New("ScrambleIslands21")
-	:InitLimit (2, 16)
-	:InitDelayOn()
-	:SpawnScheduled(1800, 0.25)
-	:InitRepeatOnLanding()
-end
-
-local function ScrambleJask21A()
-	ScrambleJask21A = SPAWN:New("ScrambleJask21A")
-	:InitLimit (2, 16)
-	:InitDelayOn()
-	:SpawnScheduled(1800, 0.25)
-	:InitRepeatOnLanding()
-end
-
-local function ScrambleJask21B()
-	ScrambleJask21B = SPAWN:New("ScrambleJask21B")
-	:InitLimit (2, 16)
-	:InitDelayOn()
-	:SpawnScheduled(1800, 0.25)
-	:InitRepeatOnLanding()
-end
-
-local function ScrambleJaskF4A()
-	ScrambleJaskF4A = SPAWN:New("ScrambleJaskF4A")
-	:InitLimit (2, 16)
-	:InitDelayOn()
-	:SpawnScheduled(1800, 0.25)
-	:InitRepeatOnLanding()
-end
-
-local function ScrambleJaskF4B()
-	ScrambleJaskF4B = SPAWN:New("ScrambleJaskF4B")
-	:InitLimit (2, 16)
-	:InitDelayOn()
-	:SpawnScheduled(1800, 0.25)
-	:InitRepeatOnLanding()
-end
-
-local function ScrambleKhasabF4()
-	ScrambleKhasabF4 = SPAWN:New("ScrambleKhasabF4")
-	:InitLimit (2, 16)
-	:InitDelayOn()
-	:SpawnScheduled(1800, 0.25)
-	:InitRepeatOnLanding()
-end
-
-local function ScrambleKhasab29()
-	ScrambleKhasab29 = SPAWN:New("ScrambleKhasab29")
-	:InitLimit (2, 16)
-	:InitDelayOn()
-	:SpawnScheduled(1800, 0.25)
-	:InitRepeatOnLanding()
-end
-
 --Define Variations of Above Flights--
 
 local function VariationA(threat)
 
 	if initPictureComplete == false then
 		
+		InlandFulcrumsA()
+		InlandFulcrumsB()
+		InlandFulcrumsC()
+		InlandFulcrumsD()
+		TomcatsA()
+		TomcatsB()
+		TomcatsC()
+		TomcatsD()
+		
 		VarAIsl21()
-		VarAJask21()
+		VarBIsl21()
+		
+		VarAJask22()
+		VarBJask22()
+		
 		VarAQWF4()
 		VarAQEF4()
-		InlandFulcrumsA()
-		InlandFulcrumsC()
-		ScrambleJask21B()
+		
 		ScrambleIslands21()
 		ScrambleKhasabF4()
 		
@@ -263,24 +252,18 @@ local function VariationA(threat)
 	if threat == 3 then
 		ScrambleKhasabF4:SpawnScheduleStart()
 		ScrambleIslands21:SpawnScheduleStart()
-		ScrambleJask21B:SpawnScheduleStart()
 	
-		
 	elseif threat == 2 then
 		ScrambleKhasabF4:SpawnScheduleStop()
-		ScrambleIslands21:SpawnScheduleStart()
-		ScrambleJask21B:SpawnScheduleStart()
-	
+		ScrambleIslands21:SpawnScheduleStart()	
 		
 	elseif threat == 1 then
 		ScrambleKhasabF4:SpawnScheduleStop()
 		ScrambleIslands21:SpawnScheduleStop()
-		ScrambleJask21B:SpawnScheduleStart()
 
 	else	
 		ScrambleKhasabF4:SpawnScheduleStop()
 		ScrambleIslands21:SpawnScheduleStop()
-		ScrambleJask21B:SpawnScheduleStop()
 	end	
 end
 
@@ -288,14 +271,26 @@ local function VariationB(threat)
 
 	if initPictureComplete == false then
 	
-		VarBIsl21()
-		VarBJask21()
+		InlandFulcrumsA()
+		InlandFulcrumsB()
+		InlandFulcrumsC()
+		InlandFulcrumsD()
+		TomcatsA()
+		TomcatsB()
+		TomcatsC()
+		TomcatsD()
+		
+		VarAIsl22()
+		VarBIsl22()
+		
+		VarAJaskF5()
+		VarBJaskF5()
+		
+		
 		VarBQWF4()
 		VarBQEF4()
-		InlandFulcrumsB()
-		InlandFulcrumsD()
-		ScrambleJask21A()
-		ScrambleIslands21()
+		
+		ScrambleIslands22()
 		ScrambleKhasabF4()
 	
 		env.info("PROP-AIR: Variation B default state initiated.")
@@ -304,25 +299,19 @@ local function VariationB(threat)
 	
 	if threat == 3 then
 		ScrambleKhasabF4:SpawnScheduleStart()
-		ScrambleIslands21:SpawnScheduleStart()
-		ScrambleJask21A:SpawnScheduleStart()
-	
+		ScrambleIslands22:SpawnScheduleStart()
 		
 	elseif threat == 2 then
 		ScrambleKhasabF4:SpawnScheduleStop()
-		ScrambleIslands21:SpawnScheduleStart()
-		ScrambleJask21A:SpawnScheduleStart()
-	
+		ScrambleIslands22:SpawnScheduleStart()	
 		
 	elseif threat == 1 then
 		ScrambleKhasabF4:SpawnScheduleStop()
-		ScrambleIslands21:SpawnScheduleStop()
-		ScrambleJask21A:SpawnScheduleStart()
+		ScrambleIslands22:SpawnScheduleStop()
 
 	else	
 		ScrambleKhasabF4:SpawnScheduleStop()
-		ScrambleIslands21:SpawnScheduleStop()
-		ScrambleJask21A:SpawnScheduleStop()
+		ScrambleIslands22:SpawnScheduleStop()
 	end
 end
 
@@ -330,172 +319,50 @@ local function VariationC(threat)
 
 	if initPictureComplete == false then
 	
-		VarAIsl21()
-		VarAJaskF4()
-		VarAQW29()
-		VarAQE29()
+		InlandFulcrumsA()
+		InlandFulcrumsB()
+		InlandFulcrumsC()
+		InlandFulcrumsD()
 		TomcatsA()
+		TomcatsB()
 		TomcatsC()
-		ScrambleIslands21()
-		ScrambleJaskF4B()
-		ScrambleKhasab29()
+		TomcatsD()
+		
+		VarAIslF5()
+		VarBIslF5()
+		
+		VarAJask21()
+		VarBJask21()
+		
+		VarAQEF4()
+		VarBQWF4()
+		
+		ScrambleIslandsF5()
+		ScrambleKhasabF4()
 	
 		env.info("PROP-AIR: Variation C default state initiated.")
 		initPictureComplete = true
 	end
 	
 	if threat == 3 then
-		ScrambleKhasab29:SpawnScheduleStart()
-		ScrambleIslands21:SpawnScheduleStart()
-		ScrambleJaskF4B:SpawnScheduleStart()
+		ScrambleKhasabF4:SpawnScheduleStart()
+		ScrambleIslandsF5:SpawnScheduleStart()
 	
 		
 	elseif threat == 2 then
-		ScrambleKhasab29:SpawnScheduleStop()
-		ScrambleIslands21:SpawnScheduleStart()
-		ScrambleJaskF4B:SpawnScheduleStart()
+		ScrambleKhasabF4:SpawnScheduleStop()
+		ScrambleIslandsF5:SpawnScheduleStart()
 	
-		
 	elseif threat == 1 then
-		ScrambleKhasab29:SpawnScheduleStop()
-		ScrambleIslands21:SpawnScheduleStop()
-		ScrambleJaskF4B:SpawnScheduleStart()
+		ScrambleKhasabF4:SpawnScheduleStop()
+		ScrambleIslandsF5:SpawnScheduleStop()
 
 	else	
-		ScrambleKhasab29:SpawnScheduleStop()
-		ScrambleIslands21:SpawnScheduleStop()
-		ScrambleJaskF4B:SpawnScheduleStop()
+		ScrambleKhasabF4:SpawnScheduleStop()
+		ScrambleIslandsF5:SpawnScheduleStop()
 	end
 end
 
-local function VariationD(threat)
-
-	if initPictureComplete == false then
-	
-		VarBIsl21()
-		VarBJaskF4()
-		VarBQW29()
-		VarBQE29()
-		TomcatsA()
-		TomcatsD()
-		ScrambleIslands21()
-		ScrambleJaskF4A()
-		ScrambleKhasab29()
-		
-		env.info("PROP-AIR: Variation D default state initiated.")
-		initPictureComplete = true
-	end
-	
-	if threat == 3 then
-		ScrambleKhasab29:SpawnScheduleStart()
-		ScrambleIslands21:SpawnScheduleStart()
-		ScrambleJaskF4A:SpawnScheduleStart()
-	
-		
-	elseif threat == 2 then
-		ScrambleKhasab29:SpawnScheduleStop()
-		ScrambleIslands21:SpawnScheduleStart()
-		ScrambleJaskF4A:SpawnScheduleStart()
-	
-		
-	elseif threat == 1 then
-		ScrambleKhasab29:SpawnScheduleStop()
-		ScrambleIslands21:SpawnScheduleStop()
-		ScrambleJaskF4A:SpawnScheduleStart()
-
-	else	
-		ScrambleKhasab29:SpawnScheduleStop()
-		ScrambleIslands21:SpawnScheduleStop()
-		ScrambleJaskF4A:SpawnScheduleStop()
-	end
-end
-
-local function VariationE(threat)
-
-	env.info("Entered Spawning Function E")
-
-	if initPictureComplete == false then
-	
-		VarAIslF4()
-		VarBJask21()
-		VarBQW29()
-		VarAQE29()
-		TomcatsB()
-		TomcatsD()
-		ScrambleIslandsF4()
-		ScrambleJask21A()
-		ScrambleKhasab29()
-	
-		env.info("PROP-AIR: Variation E default state initiated.")
-		initPictureComplete = true
-	end
-	
-	if threat == 3 then
-		ScrambleKhasab29:SpawnScheduleStart()
-		ScrambleIslandsF4:SpawnScheduleStart()
-		ScrambleJask21A:SpawnScheduleStart()
-	
-		
-	elseif threat == 2 then
-		ScrambleKhasab29:SpawnScheduleStop()
-		ScrambleIslandsF4:SpawnScheduleStart()
-		ScrambleJask21A:SpawnScheduleStart()
-	
-		
-	elseif threat == 1 then
-		ScrambleKhasab29:SpawnScheduleStop()
-		ScrambleIslandsF4:SpawnScheduleStop()
-		ScrambleJask21A:SpawnScheduleStart()
-
-	else	
-		ScrambleKhasab29:SpawnScheduleStop()
-		ScrambleIslandsF4:SpawnScheduleStop()
-		ScrambleJask21A:SpawnScheduleStop()
-	end
-end
-
-local function VariationF(threat)
-
-	if initPictureComplete == false then
-	
-		VarBIslF4()
-		VarAJask21()
-		VarAQW29()
-		VarBQE29()
-		TomcatsB()
-		TomcatsC()
-		ScrambleIslandsF4()
-		ScrambleJask21B()
-		ScrambleKhasab29()
-		
-		env.info("PROP-AIR: Variation F default state initiated.")
-		initPictureComplete = true
-	end
-	
-	if threat == 3 then
-		ScrambleKhasab29:SpawnScheduleStart()
-		ScrambleIslandsF4:SpawnScheduleStart()
-		ScrambleJask21B:SpawnScheduleStart()
-	
-		
-	elseif threat == 2 then
-		ScrambleKhasab29:SpawnScheduleStop()
-		ScrambleIslandsF4:SpawnScheduleStart()
-		ScrambleJask21B:SpawnScheduleStart()
-	
-		
-	elseif threat == 1 then
-		ScrambleKhasab29:SpawnScheduleStop()
-		ScrambleIslandsF4:SpawnScheduleStop()
-		ScrambleJask21B:SpawnScheduleStart()
-
-	else	
-		ScrambleKhasab29:SpawnScheduleStop()
-		ScrambleIslandsF4:SpawnScheduleStop()
-		ScrambleJask21B:SpawnScheduleStop()
-	end
-
-end
 
 -- Check Blue Air Player Assets and Schedule a Response Accordingly --
 
@@ -569,18 +436,6 @@ local function checkBlueAir()
 	
 		VariationC(airThreatLevel)
 		
-	elseif redVariationValue == 4 then
-	
-		VariationD(airThreatLevel)
-		
-	elseif redVariationValue == 5 then
-	
-		VariationE(airThreatLevel)
-	
-	elseif redVariationValue == 6 then
-	
-		VariationF(airThreatLevel)
-	
 	end
 		
 	env.info("PROP-AIR: Check Blue Air Function finished!")
