@@ -2,7 +2,7 @@
 
 -- Define Required Variables --
 
-local redVariationValue = math.random(1, 3)
+local redVariationValue = math.random(1, 4)
 
 local initPictureComplete = false
 
@@ -152,6 +152,43 @@ end
 
 local function ScrambleKhasabF4()
 	ScrambleKhasabF4 = SPAWN:New("ScrambleKhasabF4")
+	:InitLimit (2, 16)
+	:InitDelayOn()
+	:SpawnScheduled(1800, 0.25)
+	:InitRepeatOnLanding()
+end
+
+
+local function VarAQW23()
+		VarAQW23 = SPAWN:New("VarAQW23")
+		:InitLimit(2, 30)
+		:SpawnScheduled(1800, 0.25)
+		:InitRepeatOnLanding()
+end
+	
+local function VarBQW23()
+		VarBQW23 = SPAWN:New("VarBQW23")
+		:InitLimit(2, 30)
+		:SpawnScheduled(1800, 0.25)
+		:InitRepeatOnLanding()
+end
+		
+local function VarAQE23()
+		VarAQWE4 = SPAWN:New("VarAQE23")
+		:InitLimit(2, 30)
+		:SpawnScheduled(1800, 0.25)
+		:InitRepeatOnLanding()
+end
+	
+local function VarBQE23()
+		VarBQWE4 = SPAWN:New("VarBQE23")
+		:InitLimit(2, 30)
+		:SpawnScheduled(1800, 0.25)
+		:InitRepeatOnLanding()
+end
+
+local function ScrambleKhasab23()
+	ScrambleKhasab23 = SPAWN:New("ScrambleKhasab23")
 	:InitLimit (2, 16)
 	:InitDelayOn()
 	:SpawnScheduled(1800, 0.25)
@@ -334,35 +371,82 @@ local function VariationC(threat)
 		VarAJask21()
 		VarBJask21()
 		
-		VarAQEF4()
-		VarBQWF4()
+		VarAQE23()
+		VarBQW23()
 		
 		ScrambleIslandsF5()
-		ScrambleKhasabF4()
+		ScrambleKhasab23()
 	
 		env.info("PROP-AIR: Variation C default state initiated.")
 		initPictureComplete = true
 	end
 	
 	if threat == 3 then
-		ScrambleKhasabF4:SpawnScheduleStart()
+		ScrambleKhasab23:SpawnScheduleStart()
 		ScrambleIslandsF5:SpawnScheduleStart()
 	
 		
 	elseif threat == 2 then
-		ScrambleKhasabF4:SpawnScheduleStop()
+		ScrambleKhasab23:SpawnScheduleStop()
 		ScrambleIslandsF5:SpawnScheduleStart()
 	
 	elseif threat == 1 then
-		ScrambleKhasabF4:SpawnScheduleStop()
+		ScrambleKhasab23:SpawnScheduleStop()
 		ScrambleIslandsF5:SpawnScheduleStop()
 
 	else	
-		ScrambleKhasabF4:SpawnScheduleStop()
+		ScrambleKhasab23:SpawnScheduleStop()
 		ScrambleIslandsF5:SpawnScheduleStop()
 	end
 end
 
+local function VariationD(threat)
+
+	if initPictureComplete == false then
+	
+		InlandFulcrumsA()
+		InlandFulcrumsB()
+		InlandFulcrumsC()
+		InlandFulcrumsD()
+		TomcatsA()
+		TomcatsB()
+		TomcatsC()
+		TomcatsD()
+		
+		VarAIsl22()
+		VarBIsl22()
+		
+		VarAJask21()
+		VarBJask21()
+		
+		VarAQE23()
+		VarBQW23()
+		
+		ScrambleIslands22()
+		ScrambleKhasab23()
+	
+		env.info("PROP-AIR: Variation D default state initiated.")
+		initPictureComplete = true
+	end
+	
+	if threat == 3 then
+		ScrambleKhasab23:SpawnScheduleStart()
+		ScrambleIslands22:SpawnScheduleStart()
+	
+		
+	elseif threat == 2 then
+		ScrambleKhasab23:SpawnScheduleStop()
+		ScrambleIslands22:SpawnScheduleStart()
+	
+	elseif threat == 1 then
+		ScrambleKhasab23:SpawnScheduleStop()
+		ScrambleIslands22:SpawnScheduleStop()
+
+	else	
+		ScrambleKhasab23:SpawnScheduleStop()
+		ScrambleIslands22:SpawnScheduleStop()
+	end
+end
 
 -- Check Blue Air Player Assets and Schedule a Response Accordingly --
 
@@ -435,6 +519,10 @@ local function checkBlueAir()
 	elseif redVariationValue == 3 then
 	
 		VariationC(airThreatLevel)
+		
+	elseif redVariationValue == 4 then
+		
+		VariationD(airThreatLevel)
 		
 	end
 		
