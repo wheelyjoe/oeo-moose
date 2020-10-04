@@ -102,6 +102,9 @@ local RestrictedWeapons = {
 						{	["weaponName"] = "AGM-65K",
 							["weaponValue"] = 10,
 						},
+						{	["weaponName"] = "AGM-65L",
+							["weaponValue"] = 10,
+						},
 						{	["weaponName"] = "C-701T",
 							["weaponValue"] = 10,
 						},
@@ -134,6 +137,15 @@ local RestrictedWeapons = {
 						},
 						{	["weaponName"] = "AGM-84E SLAM",
 							["weaponValue"] = 30,
+						},
+						{	["weaponName"] = "GBU-54(V)1/B",
+							["weaponValue"] = 15,
+						},
+						{	["weaponName"] = "HYDRA-70 MPP APKWS",
+							["weaponValue"] = 25/7,
+						},
+						{	["weaponName"] = "HYDRA-70 HE APKWS",
+							["weaponValue"] = 25/7,
 						},
 }
 
@@ -177,7 +189,7 @@ function LoadoutChecker(targetGroup)
 		local TotalWeaponValue = 0
 		local EquippedWeaponCount = EquippedLoadout[i].count
 		local EquippedWeaponName = EquippedLoadout[i].desc.displayName
-		--env.info("Weapon is a(n) "..EquippedWeaponName)
+		env.info("Weapon is a(n) "..EquippedWeaponName)
 		for j = 1, #RestrictedWeapons do
 			if EquippedWeaponName == "RN-24" or EquippedWeaponName == "RN-28"
 				then

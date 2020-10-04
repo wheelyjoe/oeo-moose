@@ -5,7 +5,7 @@ local function logisticAssets()
 
 	local function ARCO()
 	  ARCOSpawner = SPAWN:New("ARCO")
-	  :InitLimit(1, 10)
+	  :InitLimit(1, 1)
 	  :SpawnScheduled(10, 0)
 	  :InitRepeatOnLanding()
 	  
@@ -13,7 +13,7 @@ local function logisticAssets()
 	 
 	local function SHELL()
 	  SHELLSpawner = SPAWN:New("SHELL")
-	  :InitLimit(1, 10)
+	  :InitLimit(1, 1)
 	  :SpawnScheduled(10, 0)
 	  :InitRepeatOnLanding()
 	  
@@ -21,7 +21,7 @@ local function logisticAssets()
 	 
 	local function TEXACO()
 	  TEXACOSpawner = SPAWN:New("TEXACO")
-	  :InitLimit(1, 10)
+	  :InitLimit(1, 1)
 	  :SpawnScheduled(10, 0)
 	  :InitRepeatOnLanding()
 	  
@@ -29,7 +29,7 @@ local function logisticAssets()
 
 	local function MAGIC()
 	  MAGICSpawner = SPAWN:New("MAGIC")
-	  :InitLimit(1, 10)
+	  :InitLimit(1, 1)
 	  :SpawnScheduled(10, 0)
 	  :InitRepeatOnLanding()
 	  
@@ -37,7 +37,7 @@ local function logisticAssets()
 	 
 	local function DARKSTAR()
 	  DARKSTARSpawner = SPAWN:New("DARKSTAR")
-	  :InitLimit(1, 10)
+	  :InitLimit(1, 1)
 	  :SpawnScheduled(10, 0)
 	  :InitRepeatOnLanding()
 	  
@@ -45,7 +45,7 @@ local function logisticAssets()
 
 	local function IranAWACS()
 		IranAWACSSpawner = SPAWN:New("IranAWACS")
-		:InitLimit(1, 10)
+		:InitLimit(1, 1)
 		:SpawnScheduled(1800, 0)
 		:InitRepeatOnLanding()
 
