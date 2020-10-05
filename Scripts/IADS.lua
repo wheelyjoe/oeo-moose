@@ -1,101 +1,52 @@
-local SAMRangeLookupTable = {
-
+local SAMRangeLookupTable = { -- Ranges at which SAM sites are considered close enough to activate in m
     ["Kub 1S91 str"] = 52000,
-
-    ["S-300PS 40B6M tr"] =  100000,  
-
+    ["S-300PS 40B6M tr"] =  100000,
     ["Osa 9A33 ln"] = 25000,
-
-    ["snr s-125 tr"] = 60000,  
-
+    ["snr s-125 tr"] = 60000,
     ["SNR_75V"] = 65000,
-
     ["Dog Ear radar"] = 26000,
-
     ["SA-11 Buk LN 9A310M1"] = 43000,
-
     ["Hawk tr"] = 60000,
-    
-    ["Tor 9A331"] = 100000,
-
+    ["Tor 9A331"] = 50000,    ["rapier_fsa_blindfire_radar"] = 6000,
+    ["Patriot STR"] = 100000,
+    ["Roland ADS"] = 7500,
+    ["HQ-7_STR_SP"] = 10000,
 }
+local IADSEnable = true -- If true IADS script is active
+local IADSRadioDetection = false -- 1 = radio detection of ARM launch on, 0 = radio detection of ARM launch off
+local IADSEWRARMDetection = true -- 1 = EWR detection of ARMs on, 0 = EWR detection of ARMs off
+local IADSSAMARMDetection = true -- 1 = SAM detectionf of ARMs on, 0 = SAM detection of ARMs off
+local EWRAssociationRange = 80000 --Range of an EWR in which SAMs are controlled
+local IADSARMHideRangeRadio = 120000 --Range within which ARM launches are detected via radio
+local IADSARMHidePctage = 20 -- %age chance of radio detection of ARM launch causing SAM shutdown
+local EWRARMShutdownChance = 25 -- %age chance EWR detection of ARM causing SAM shutdown
+local SAMARMShutdownChance = 75-- %age chance SAM detection of ARM causings SAM shuttown
+local trackMemory = 20 -- Track persistance time after last detection
+local controlledSAMNoAmmo = true -- Have controlled SAMs stay off if no ammo remaining.
+local uncontrolledSAMNoAmmo = false -- Have uncontrolled SAMs stay off if no ammo remaining
+local SAMSites = {}
+local EWRSites = {}
+local AWACSAircraft = {}
+local TrackFiles = {["SAM"] = {},
+              ["EWR"] = {},
+              ["AWACS"] = {},}
 
-local function getIndex(tab, val)
-    local index = nil
-    for i, v in ipairs(tab) do 
-        if (v.id == val) then
-          index = i 
-        end
-    end
-    return index
-end
+IADSHandler = {}
 
-function table.val_to_str ( v )
-  if "string" == type( v ) then
-    v = string.gsub( v, "\n", "\\n" )
-    if string.match( string.gsub(v,"[^'\"]",""), '^"+$' ) then
-      return "'" .. v .. "'"
-    end
-    return '"' .. string.gsub(v,'"', '\\"' ) .. '"'
-  else
-    return "table" == type( v ) and table.tostring( v ) or
-      tostring( v )
-  end
-end
-
-function table.key_to_str ( k )
-  if "string" == type( k ) and string.match( k, "^[_%a][_%a%d]*$" ) then
-    return k
-  else
-    return "[" .. table.val_to_str( k ) .. "]"
-  end
-end
-
-function table.tostring( tbl )
-  local result, done = {}, {}
-  for k, v in ipairs( tbl ) do
-    table.insert( result, table.val_to_str( v ) )
-    done[ k ] = true
-  end
-  for k, v in pairs( tbl ) do
-    if not done[ k ] then
-      table.insert( result,
-        table.key_to_str( k ) .. "=" .. table.val_to_str( v ) )
-    end
-  end
-  return "{" .. table.concat( result, "," ) .. "}"
-end
-
-local SAMSite = {}
-local EWRSite = {}
-local AEWAircraft = {}
-local suppressedGroups = {}
-local tracked_weapons = {}
-SEADHandler = {}
-
-local function TableConcat(t1,t2)
-  for i=1,#t2 do
-    t1[#t1+1] = t2[i]
-  end
-  return t1
-end
-
-local function tablelength(T)
+local function  tablelength(T)
   if T == nil then
-
     return 0
-
   end
   local count = 0
-  for _ in pairs(T) do 
-
-    count = count + 1         
+  for _, item in pairs(T) do
+    if item~=nil then
+      count = count + 1
+    end
   end
   return count
 end
 
 local function getDistance(point1, point2)
-
   local x1 = point1.x
   local y1 = point1.y
   local z1 = point1.z
@@ -106,518 +57,558 @@ local function getDistance(point1, point2)
   local dY = math.abs(y1-y2)
   local dZ = math.abs(z1-z2)
   local distance = math.sqrt(dX*dX + dZ*dZ)
-
   return distance
-
 end
 
 local function getDistance3D(point1, point2)
-
   local x1 = point1.x
   local y1 = point1.y
   local z1 = point1.z
   local x2 = point2.x
   local y2 = point2.y
   local z2 = point2.z
-
   local dX = math.abs(x1-x2)
   local dY = math.abs(y1-y2)
   local dZ = math.abs(z1-z2)
   local distance = math.sqrt(dX*dX + dZ*dZ + dY*dY)
-
   return distance
-
 end
 
-local function rangeOfSAM(gp)  
-  
-  local maxRange = 0 
-  for i, unit in pairs(gp:getUnits()) do     
-    if unit:hasAttribute("SAM TR") and SAMRangeLookupTable[unit:getTypeName()] then  
+local function rangeOfSAM(gp)
+  local maxRange = 0
+  for _, unit in pairs(gp:getUnits()) do
+    if unit:hasAttribute("SAM TR") and SAMRangeLookupTable[unit:getTypeName()] then
       local samRange  = SAMRangeLookupTable[unit:getTypeName()]
-      if maxRange < samRange then         
-        maxRange = samRange          
+      if maxRange < samRange then
+        maxRange = samRange
       end
     end
   end
-    return maxRange  
+  return maxRange
 end
 
-local function disableSAM(disableArray)
-  if disableArray[3] then
---    ----env.info("Emergency shutdown!")
-    if SAMSite[disableArray[1]] then
-    
-      SAMSite[disableArray[1]].DisableTime = disableArray[2]
-      SAMSite[disableArray[1]].EnableTime = nil
-      SAMSite[disableArray[1]].Emitting = false
-      SAMSite[disableArray[1]].SAMGroup:getController():setOption(AI.Option.Ground.id.ALARM_STATE,1)
-      if disableArray[2] then
-      
---        ----env.info("SAM Site: "..SAMSite[disableArray[1]].Name.." disabled for "..disableArray[2].." seconds")
-            
-      else
-      
---        ----env.info("SAM Site: "..SAMSite[disableArray[1]].Name.." disabled until instructed otherwise")
-              
+local function disableSAM(site)
+ if site.Enabled then
+    local inRange = false
+    if site.TrackFiles then
+      for _, track in pairs(site.TrackFiles) do  
+        if track.Position and getDistance(site.Location, track.Position) < (site.EngageRange * 1.15) then    
+          inRange = true    
+        end
       end
-    end
-  else   
---    ----env.info("Non-emergency shutdown")
---    ----env.info(SAMSite[disableArray[1]].SAMGroup:getName().." is in the disable fcn")
-    local detectedTargets = SAMSite[disableArray[1]].SAMGroup:getController():getDetectedTargets()
---    ----env.info("It has detected "..#detectedTargets.." units and will stay on")
-    if disableArray[2] == nil then
- --     ----env.info("Disabling with no disable time")
-      SAMSite[disableArray[1]].DisableTime = nil
-      SAMSite[disableArray[1]].EnableTime = nil
-      SAMSite[disableArray[1]].Emitting = false
-      SAMSite[disableArray[1]].SAMGroup:getController():setOption(AI.Option.Ground.id.ALARM_STATE,1)
---      ----env.info("SAM Site: "..SAMSite[disableArray[1]].Name.." disabled until further notice")    
-
-    elseif (disableArray[2] > SAMSite[disableArray[1]].DisableTime) then
---      ----env.info("Disabling with disable time")
-      SAMSite[disableArray[1]].DisableTime = disableArray[2]
-      SAMSite[disableArray[1]].EnableTime = nil
-      SAMSite[disableArray[1]].Emitting = false
-      SAMSite[disableArray[1]].SAMGroup:getController():setOption(AI.Option.Ground.id.ALARM_STATE,1)
---      ----env.info("SAM Site: "..SAMSite[disableArray[1]].Name.." disabled for "..disableArray[2].." seconds")    
-
-    end
-  end
-end
-
-local function enableSAM(enableArray)
-
-  if SAMSite[enableArray[1]] and SAMSite[enableArray[1]].Hidden == false then
-  
-    SAMSite[enableArray[1]].Emitting = true
-    SAMSite[enableArray[1]].EnableTime = enableArray[2]
-    SAMSite[enableArray[1]].SAMGroup:getController():setOption(AI.Option.Ground.id.ALARM_STATE,2)
-    if enableArray[2] then
-    
---      ----env.info("SAM Site: "..SAMSite[enableArray[1]].Name.." enabled for: " ..enableArray[2].."s")
-         
+    end 
+    if inRange then     
+      self.theater:queueCommand(10, Command(self.disableSAM, self, site))
     else
-    
---     ----env.info("SAM Site: "..SAMSite[enableArray[1]].Name.." enabled until further notice")
-      
+      site.SAMGroup:getController():setOption(AI.Option.Ground.id.ALARM_STATE,1)
+      site.Enabled = false
+--      env.info("SAM: "..site.Name.." disabled") 
+    end 
+  end
+  return nil
+end
+
+local function hideSAM(site)
+  site.SAMGroup:getController():setOption(AI.Option.Ground.id.ALARM_STATE,1)
+  site.Enabled = false
+--  env.info("SAM: "..site.Name.." hidden")
+  return nil
+end
+
+local function  ammoCheck(site)
+  for _, unt in pairs(site.SAMGroup:getUnits()) do
+    local ammo = unt:getAmmo()
+    if ammo then
+      for j=1, #ammo do
+        if ammo[j].count > 0 and ammo[j].desc.guidance == 3 or ammo[j].desc.guidance == 4 then
+          return true
+        end
+      end
     end
-
   end
 end
 
-local function disableAllSAMs()
-
-  for i, SAM in pairs(SAMSite) do
-    local disableArray = {SAM.Name, nil, nil} 
-    disableSAM(disableArray)
-
-  end
-end
-
-local function enableUncontrolledSAMs()
-  for i, SAM in pairs(SAMSite) do
-
-    if tablelength(SAM.ControlledBy) == 0 then
-      local enableArray = {SAM.Name, nil}
-      enableSAM(enableArray)
---      --env.info(SAM.Name.." is uncontrolled and being activated")
+local function enableSAM(site)
+  if (not site.Hidden) and (not site.Enabled) then
+  local hasAmmo = ammoCheck(site)
+    if tablelength(site.ControlledBy) > 0 then
+      if (controlledSAMNoAmmo and (not hasAmmo)) then
+      else
+        site.SAMGroup:getController():setOption(AI.Option.Ground.id.ALARM_STATE,2)
+        site.Enabled = true
+--        env.info("SAM: "..site.Name.." enabled")
+      end
+    else
+      if uncontrolledSAMNoAmmo and not hasAmmo  then
+      else
+        site.SAMGroup:getController():setOption(AI.Option.Ground.id.ALARM_STATE,2)
+        site.Enabled = true
+ --       env.info("SAM: "..site.Name.." enabled")
+      end
     end
   end
 end
 
 local function associateSAMS()
-  
-  for j, SAM in pairs(SAMSite) do  
-    SAM.ControlledBy = {}
-  end
-  for i, EWR in pairs(EWRSite) do
-  EWR.SAMsControlled = {}
-    for j, SAM in pairs(SAMSite) do
-      if getDistance3D(SAM.Location, EWR.Location) < 80000 then
-        
+  for _, EWR in pairs(EWRSites) do
+    EWR.SAMsControlled = {}
+    for _, SAM in pairs(SAMSites) do
+      if SAM.SAMGroup:getCoalition() == EWR.EWRGroup:getCoalition() and getDistance3D(SAM.Location, EWR.Location) < EWRAssociationRange then
         EWR.SAMsControlled[SAM.Name] = SAM
         SAM.ControlledBy[EWR.Name] = EWR
-        --env.info("EWR: "..EWR.Name.." is associated with SAM: "..SAM.Name)
-        
       end
     end
-  end   
+  end
 end
 
-local function populateLists()
-  SAMSite = {}
-  EWRSite = {}
-  AEWAircraft = {}
-  local isEWR = 0
-  local isSAM = 0
+local function magnumHide(site)
+  if site.Type == "Tor 9A331" then
+  elseif not site.Hidden then
+    local randomTime = math.random(15,35)
+    timer.scheduleFunction(hideSAM, site, timer.getTime()+randomTime)    
+    site.HiddenTime = math.random(65,100)+randomTime
+    site.Hidden = true
+  end
+end
+
+local function prevDetected(Sys, ARM)
+  for _, prev in pairs(Sys.ARMDetected) do
+    if prev:isExist() then
+      if ARM:getName() == prev:getName() then
+        return true
+      end
+    else
+      prev = nil
+    end
+  end
+
+end
+
+local function addTrackFile(site, targets)
+  if targets.object:isExist() then
+    local trackName = targets.object.id_
+    site.trackFiles[trackName] = {}
+    site.trackFiles[trackName]["Name"] = trackName
+    site.trackFiles[trackName]["Object"] = targets.object
+    site.trackFiles[trackName]["LastDetected"] = timer.getAbsTime()
+    if targets.distance then
+      site.trackFiles[trackName]["Position"] = targets.object:getPoint()
+      site.trackFiles[trackName]["Velocity"] = targets.object:getVelocity()
+    end
+    if targets.type then
+      site.trackFiles[trackName]["Category"] = targets.object:getCategory()
+      site.trackFiles[trackName]["Type"] = targets.object:getTypeName()
+  
+    end
+    if site.Datalink then
+      site.trackFiles[trackName]["Datalink"] = true
+    end
+  end
+end
+
+local function EWRTrackFileBuild()
+  for _, EWR in pairs(EWRSites) do
+    local detections = EWR.EWRGroup:getController():getDetectedTargets(Controller.Detection.RADAR)
+    for j, targets in pairs(detections) do
+      if targets.object and targets.object:isExist() and targets.object:inAir() then
+        local trackName = targets.object.id_
+        addTrackFile(EWR, targets)
+        TrackFiles["EWR"][trackName] = EWR.trackFiles[trackName]
+        if targets.object:getCategory() == 2 and targets.object:getDesc().guidance == 5 and IADSEWRARMDetection and not prevDetected(EWR, targets.object) then
+          EWR.ARMDetected[targets.object:getName()] = targets.object
+          for _, SAM in pairs(EWR.SAMsControlled) do
+            if math.random(1,100) < EWRARMShutdownChance then
+              magnumHide(SAM)
+            end
+          end
+        end
+      end
+    end
+  end
+  return timer.getTime() + 2
+end
+
+local function SAMTrackFileBuild()
+  for _, SAM in pairs(SAMSites) do
+    local detections = SAM.SAMGroup:getController():getDetectedTargets(Controller.Detection.RADAR)
+    for _, targets in pairs(detections) do
+      if targets.object and targets.object:isExist() and targets.object:inAir() then
+        local trackName = targets.object.id_
+        addTrackFile(SAM, targets)
+        TrackFiles["SAM"][trackName] = SAM.trackFiles[trackName]        
+        if targets.object:getCategory() == 2 and targets.object:getDesc().guidance == 5 and IADSSAMARMDetection and not prevDetected(SAM, targets.object) then
+          SAM.ARMDetected[targets.object:getName()] = targets.object
+          if math.random(1,100) < SAMARMShutdownChance then
+            magnumHide(SAM)
+          end
+        end
+      end
+    end
+  end
+  return timer.getTime() + 2
+end
+
+local function AWACSTrackFileBuild()
+  for _, AWACS in pairs(AWACSAircraft) do
+    local detections = AWACS.AWACSGroup:getController():getDetectedTargets(Controller.Detection.RADAR)
+    for _, targets in pairs(detections) do
+      if targets.object and targets.object:isExist() and targets.object:inAir() then
+        local trackName = targets.object.id_
+        addTrackFile(AWACS, targets)
+        TrackFiles["AWACS"][trackName] = AWACS.trackFiles[trackName]
+      end
+    end
+  end
+  return timer.getTime() + 2
+end
+
+local function EWRSAMOnRequest()
+  for _, SAM in pairs(SAMSites) do
+    if(tablelength(SAM.ControlledBy) > 0) then
+      local viableTarget = false 
+      for _, EWR in pairs(SAM.ControlledBy) do
+        for _, target in pairs(EWR.trackFiles) do
+          if target.Position and getDistance(SAM.Location, target.Position) < SAM.EngageRange then
+            viableTarget = true
+          end
+        end 
+      end
+      if viableTarget then
+        enableSAM(SAM)
+      else
+        disableSAM(SAM)        
+      end
+    end
+  end
+  return timer.getTime() + 2
+end
+
+local function SAMCheckHidden()
+  for _, SAM in pairs(SAMSites) do
+    if SAM.Hidden then
+      SAM.HiddenTime = SAM.HiddenTime - 2
+      if SAM.HiddenTime < 1 then
+        SAM.Hidden = false
+      end
+    end
+  end
+  return timer.getTime() + 2
+end
+
+local function BlinkSAM()
+  for _, SAM in pairs(SAMSites) do
+    if tablelength(SAM.ControlledBy) < 1 then
+--      env.info("SAM: "..SAM.Name.." is uncontrolled")
+      if SAM.BlinkTimer < 1  and (not SAM.Hidden) then
+        if SAM.Enabled then
+--          env.info("Blink Off")
+          disableSAM(SAM)
+          SAM.BlinkTimer = math.random(30,60)
+        else
+--          env.info("Blink On")
+          enableSAM(SAM)
+          SAM.BlinkTimer = math.random(30,60)
+        end
+      else
+      SAM.BlinkTimer = SAM.BlinkTimer - 2
+      end
+    end
+  end
+  return timer.getTime() + 2
+end
+
+local function checkGroupRole(gp)
+
+  local isEWR = false
+  local isSAM = false
+  local isAWACS = false
+  local hasDL = false
   local samType
   local numSAMRadars = 0
   local numTrackRadars = 0
   local numEWRRadars = 0
-  for i, gp in pairs(coalition.getGroups(1)) do
-
-    if gp:getCategory() == 2 then
-
-      for j, unt in pairs(gp:getUnits()) do
-
+  if gp:getCategory() == 2 then
+      for _, unt in pairs(gp:getUnits()) do
         if unt:hasAttribute("EWR") then
-
-          isEWR = 1
-          numEWRRadars = numEWRRadars + 1
-
-        elseif unt:hasAttribute("SAM TR") or unt:hasAttribute("SAM SR") then
-
-          isSAM = 1
-          samType = unt:getTypeName()
-          numSAMRadars = numSAMRadars + 1
-
-        end
+        isEWR = true
+        numEWRRadars = numEWRRadars + 1
+      elseif unt:hasAttribute("SAM TR") then
+        isSAM = true
+        samType = unt:getTypeName()
+        numSAMRadars = numSAMRadars + 1
       end
-      if isEWR == 1 then
-        EWRSite[gp:getName()] = {
-
-            ["Name"] = gp:getName(),
-            ["EWRGroup"] = gp,
-            ["SAMsControlled"] = {},
-            ["DetectedUnits"] = {},
-            ["Location"] = gp:getUnit(1):getPoint(),
-            ["numEWRRadars"] = numEWRRadars
-
-        }
---       ----env.info("EWR Registered, named: "..gp:getName())
-        isEWR = 0  
-        isSAM = 0
-        numEWRRadars = 0
-        numSAMRadars = 0
-
-      elseif isSAM == 1 and rangeOfSAM(gp) then
-
-        SAMSite[gp:getName()] = {
-
-            ["Name"] = gp:getName(),
-            ["SAMGroup"] = gp,
-            ["Type"] = samType,
-            ["Location"] = gp:getUnit(1):getPoint(),
-            ["numSAMRadars"] = numSAMRadars,
-            ["EngageRange"] = rangeOfSAM(gp),           
-            ["ControlledBy"] = {}, 
-            ["SuppressedTime"] = 0,
-            ["Suppressed"] = false,
-            ["Hidden"] = false,
-            ["HiddenTime"] = 0,
-            ["HideCountdown"] = 0,
-            ["HideCountdownBool"] = false,
-            ["EnableTime"] = 0,
-            ["DisableTime"] = 0,
-            ["SearchVolume"] =
-            {
-              id = world.VolumeType.SPHERE,
-              params =
-              {
-                point =  gp:getUnit(1):getPoint(),
-                raidus = rangeOfSAM(gp)
-              }
-            }
-        }
-        isEWR = 0  
-        isSAM = 0
-        numEWRRadars = 0
-        numSAMRadars = 0
-
-      end 
-    end  
-  end
-  associateSAMS()
-  --env.info("Lists Populated, there are "..tablelength(EWRSite).." EWR Sites, "..tablelength(SAMSite).." SAM Sites, and "..tablelength(AEWAircraft).." AEW Aircraft. SAM sites associated with IADS network.")
-  return timer.getTime() + 600
-end
-
-local function suppress(suppArray)
-  
-  suppressedGroups[suppArray[1]:getName()] = {["SuppGroup"] = suppArray[1], ["SuppTime"] = suppArray[2]}
-  suppArray[1]:getController():setOnOff(false)
-
-end
-
-local function unSuppress(unSuppGroup)
-  
---  --env.info("Removing suppressed unit from group")
-  unSuppGroup:getController():setOnOff(true)
-  suppressedGroups[unSuppGroup:getName()] = nil
---  --env.info("Suppressed unit removed from group")
-
-end
-
-local function ifFoundK(foundItem, impactPoint)
---  --env.info("Found unit in kill range")
-  local point1 = foundItem:getPoint()
-  point1.y = point1.y + 2
-  local point2 = impactPoint
-  point2.y = point2.y + 2
-  if land.isVisible(point1, point2) == true then
---    --env.info("Unit"..foundItem:getID().. "Destroyed by script")                         
-    trigger.action.explosion(point1, 1)
-  end                                                                    
-end
-
-local function ifFoundD(foundItem, impactPoint)
---  --env.info("Found static in kill range")
-  local point1 = foundItem:getPoint()
-  point1.y = point1.y + 2
-  local point2 = impactPoint
-  point2.y = point2.y + 2
-  if land.isVisible(point1, point2) == true then
---    --env.info("Static"..foundItem:getID().. "Destroyed by script")                         
-    trigger.action.explosion(point1, 10)
-  end  
-end
-
-local function ifFoundS(foundItem, impactPoint)
---  --env.info("Found unit in suppression range")
-  if foundItem:getGroup() and foundItem:getName() and foundItem:getGroup():getCategory() == 2 then
---    --env.info("Suppresing: "..foundItem:getName())
-    local point1 = foundItem:getPoint()
-    point1.y = point1.y + 5
-    local point2 = impactPoint
-    point2.y = point2.y + 5
-    local suppTimer = math.random(35,100)
-    local suppArray = {foundItem:getGroup(), suppTimer}
-    if land.isVisible(point1, point2) == true then
-      suppress(suppArray)
---      --env.info("Suppressing.")
-    end  
-  end
-end
-
-local function magnumHide(hiddenGroup)
-
-    SAMSite[hiddenGroup:getName()].HideCountdownBool = true
-    SAMSite[hiddenGroup:getName()].HideCountdown = math.random(15,25)
---    --env.info("Magnum Hide "..hiddenGroup:getName())  
-end
-
-local function track_wpns()
-  for wpn_id_, wpnData in pairs(tracked_weapons) do
-
-    if wpnData.wpn:isExist() then  -- just update position and direction.
-      wpnData.pos = wpnData.wpn:getPosition().p
-      wpnData.dir = wpnData.wpn:getPosition().x
-      wpnData.exMass = wpnData.wpn:getDesc().warhead.explosiveMass
-    else -- wpn no longer exists, must be dead.
---      --env.info("Weapon impacted, mass of weapon warhead is " .. wpnData.exMass)
-      local suppressionRadius = wpnData.exMass
-      local ip = land.getIP(wpnData.pos, wpnData.dir, 20)  -- terrain intersection point with weapon's nose.  Only search out 20 meters though.
-      local impactPoint
-      if not ip then -- use last position
-        impactPoint = wpnData.pos
-       -- trigger.action.outText("Impact Point:\nPos X: " .. impactPoint.x .. "\nPos Z: " .. impactPoint.z, 2)
-      else -- use intersection point
-        impactPoint = ip
-       -- trigger.action.outText("Impact Point:\nPos X: " .. impactPoint.x .. "\nPos Z: " .. impactPoint.z, 2)
-      end 
-      local VolK =
-        {
-          id = world.VolumeType.SPHERE,
-          params =
-          {
-            point = impactPoint,
-            radius = suppressionRadius*0.2
-          }
-        }
-     local VolD =
-        {
-          id = world.VolumeType.SPHERE,
-          params =
-          {
-            point = impactPoint,
-            radius = suppressionRadius*0.1
-          }
-        }
-      local VolS =
-        {
-          id = world.VolumeType.SPHERE,
-          params =
-          {
-            point = impactPoint,
-            radius = suppressionRadius
-          }
-        }                              
---      --env.warning("Begin Search")
-      world.searchObjects(Object.Category.UNIT, VolK, ifFoundK,impactPoint)
-      world.searchObjects(Object.Category.STATIC, VolD, ifFoundD,impactPoint)
-      world.searchObjects(Object.Category.UNIT, VolS, ifFoundS,impactPoint)               
---      --env.warning("Finished Search")
-      tracked_weapons[wpn_id_] = nil -- remove from tracked weapons first.         
+      if unt:hasAttribute("Datalink") then
+        hasDL = true
+      end
+    end
+    if isEWR then
+      EWRSites[gp:getName()] = {
+          ["Name"] = gp:getName(),
+          ["EWRGroup"] = gp,
+          ["SAMsControlled"] = {},
+          ["Location"] = gp:getUnit(1):getPoint(),
+          ["numEWRRadars"] = numEWRRadars,
+          ["ARMDetected"] = {},
+          ["Datalink"] = hasDL,
+          ["trackFiles"] = {},
+      }
+      return gp:getName()      
+    elseif isSAM and rangeOfSAM(gp) then
+      SAMSites[gp:getName()] = {
+          ["Name"] = gp:getName(),
+          ["SAMGroup"] = gp,
+          ["Type"] = samType,
+          ["Location"] = gp:getUnit(1):getPoint(),
+          ["numSAMRadars"] = numSAMRadars,
+          ["EngageRange"] = rangeOfSAM(gp),           
+          ["ControlledBy"] = {}, 
+          ["Enabled"] = true,
+          ["Hidden"] = false,
+          ["BlinkTimer"] = 0,
+          ["ARMDetected"] = {},
+          ["Datalink"] = hasDL, 
+          ["trackFiles"] = {},           
+      }
+      return gp:getName()      
+    end
+  elseif gp:getCategory() == 0 then
+    local numAWACS = 0
+    for _, unt in pairs(gp:getUnits()) do
+      if unt:hasAttribute("AWACS") then      
+        isAWACS = true
+        numAWACS = numAWACS+1
+      end
+      if unt:hasAttribute("Datalink") then
+        hasDL = true      
+      end  
+    end 
+    if isAWACS then 
+      AWACSAircraft[gp:getName()] = {
+        ["Name"] = gp:getName(),
+        ["AWACSGroup"] = gp,
+        ["numAWACS"] = numAWACS,
+        ["Datalink"] = hasDL,
+        ["trackFiles"] = {},   
+       }    
+    return gp:getName()
     end
   end
-  return timer.getTime() + 1
 end
 
-function SEADHandler:onEvent(event)
-  if event.id == world.event.S_EVENT_DEAD then
---  --env.info("Something died")
---  --env.info("A unit category is: " ..Object.Category.UNIT)
+local function onDeath(event)
   if event.initiator:getCategory() == Object.Category.UNIT and event.initiator:getGroup() then
---    --env.info("It's a unit with a group, group is named: " ..event.initiator:getGroup():getName()) 
     local eventUnit = event.initiator  
     local eventGroup = event.initiator:getGroup()
-    for i, SAM in pairs(SAMSite) do     
+    for _, SAM in pairs(SAMSites) do     
       if eventGroup:getName() == SAM.Name then
-        --env.info("It was an SAM")
-        if eventUnit:hasAttribute("SAM TR") or eventUnit:hasAttribute("SAM SR") then
-          --env.info("Radar destroyed")
+        if eventUnit:hasAttribute("SAM TR") then
           SAM.numSAMRadars = SAM.numSAMRadars - 1
-          --env.info("There are :" ..SAM.numSAMRadars .." left")         
         end  
         if SAM.numSAMRadars < 1 then
-          --env.info("with no radars left")
-          for j, EWR in pairs(EWRSite) do           
-              for k, SAMControlled in pairs(EWR.SAMsControlled) do 
-                --env.info(EWR.Name .. " / " ..SAMControlled.Name)             
-                if SAMControlled.Name == SAM.Name then
-                  SAMControlled = nil
-                  --env.info("EWR/SAM association removed between " ..SAM.Name.." and " ..EWR.Name)
-                end              
-              end          
+--          env.info("SAM :"..SAM.Name.." died")
+          for _, EWR in pairs(EWRSites) do           
+            for _, SAMControlled in pairs(EWR.SAMsControlled) do 
+              if SAMControlled.Name == SAM.Name then
+                EWR.SAMsControlled[SAM.Name] = nil
+              end              
+            end          
           end
-          SAMSite[SAM.Name] = nil
-          --env.info("Removed from list")          
+          SAMSites[SAM.Name] = nil
         end
       end
     end 
-    for i, EWR in pairs(EWRSite) do    
+    for _, EWR in pairs(EWRSites) do    
       if eventGroup:getName() == EWR.Name then
         if eventUnit:hasAttribute("EWR") then
-          --env.info("It was an EWR")
           EWR.numEWRRadars = EWR.numEWRRadars - 1
-          --env.info("Number of radar units remaining: " ..EWR.numEWRRadars)
-          if EWR.numEWRRadars < 1 then      
-            --env.info("with no radars left")
-            for j, SAM in pairs(SAMSite) do              
-              for k, controllingEWR in pairs(SAM.ControlledBy) do              
-                if controllingEWR.Name == EWR.Name then                
-                  controllingEWR = nil
-                  --env.info("EWR: " ..EWR.Name.. "is no longer assoicated with SAM: "..SAM.Name)                
+          if EWR.numEWRRadars < 1 then  
+--            env.info("EWR :"..EWR.Name.." died")
+            for _, SAM in pairs(SAMSites) do              
+              for _, controllingEWR in pairs(SAM.ControlledBy) do              
+                if controllingEWR.Name == EWR.Name then 
+                  SAM.ControlledBy[EWR.Name] = nil
                 end              
               end            
             end
-            EWRSite[EWR.Name] = nil              
-            --env.info("Removed from list") 
+            EWRSites[EWR.Name] = nil              
           end
         end
-      enableUncontrolledSAMs()
+      end
+      for _, AWACS in pairs(AWACSAircraft) do    
+        if eventGroup:getName() == EWR.Name then
+          if eventUnit:hasAttribute("AWACS") then
+            AWACS.numAWACS = AWACS.numAWACS - 1
+            if AWACS.numAWACS < 1 then  
+--              env.info("AWACS :"..AWACS.Name.." died")
+              AWACSAircraft[AWACS.Name] = nil              
+            end
+          end
+        end
       end
     end   
-  end  
-  elseif event.id == world.event.S_EVENT_SHOT then
-    if event.weapon then
---  --env.info("Something has been launched")
---  --env.info("Desc is: ".. table.tostring(Weapon.getDesc(event.weapon)))
-      local ordnance = event.weapon                  
-      local ordnanceName = ordnance:getTypeName()
+  end   
+end
+
+local function onShot(event)
+  if IADSRadioDetection then
+    if event.weapon then    
+      local ordnance = event.weapon
       local WeaponPoint = ordnance:getPoint()
-      local WeaponDesc = event.weapon:getDesc()
+      local WeaponDesc = ordnance:getDesc()
       local init = event.initiator
-      if (WeaponDesc.category == 3 or WeaponDesc.category == 2 or WeaponDesc.category == 1) and not (WeaponDesc.missileCategory == 1 or WeaponDesc.missileCategory == 2 or WeaponDesc.missileCategory == 3) then
-        if WeaponDesc.guidance == 5 then
---         --env.info("Is ARM")
-          for i, SAM in pairs(SAMSite) do        
-            if math.random(1,100) > 10 and getDistance(SAM.Location, WeaponPoint) < 120000 then   
-              if SAM.Type ~= "Tor 9A331" then
-                 magnumHide(SAM.SAMGroup)
-              end
-            end     
-          end
-        end
-        tracked_weapons[event.weapon.id_] = { wpn = ordnance, init = init:getName(), pos = WeaponPoint,}
---        --env.info("Weapon is a: " .. ordnanceName)                                                          
+      if WeaponDesc.guidance == 5 then      
+        for _, SAM in pairs(SAMSites) do        
+          if math.random(1,100) < IADSARMHidePctage and getDistance(SAM.Location, WeaponPoint) < IADSARMHideRangeRadio then          
+            magnumHide(SAM)            
+          end        
+        end      
       end
-    end
+    end 
   end
 end
 
-
-local function IADSMonitor()
-  ----env.info("IADS Start")
-  -- CHECK SUPPRESSION
-  for i, suppGroup in pairs(suppressedGroups)  do 
-    if suppGroup.SuppTime and suppGroup.SuppGroup then
-      if suppGroup.SuppTime < 1 then      
-        unSuppress(suppGroup.SuppGroup)      
-      else     
-        suppGroup.SuppTime = suppGroup.SuppTime - 1  
-      end
-    end 
-  end  
-  for i, SAM in pairs(SAMSite) do
-    if SAM.SAMGroup:isExist()  then     
-      if SAM.HideCountdownBool then 
-        if SAM.HideCountdown < 1 then          
-          local disableArray = {SAM.Name, nil, true}
-          SAM.HideCountdownBool = false
-          SAM.Hidden = true
-          SAM.HiddenTime = math.random(65,100)
-          disableSAM(disableArray)        
-        else        
-          SAM.HideCountdown = SAM.HideCountdown - 1         
-        end      
-      elseif SAM.Hidden then    
-        if SAM.HiddenTime < 1 then        
-          local enableArray = {SAM.Name, 120}
-          SAM.Hidden = false
-          enableSAM(enableArray)        
-        else       
-          SAM.HiddenTime = SAM.HiddenTime - 1
-        end   
-      end  
-      if SAM.EnableTime and SAM.EnableTime < 1 and SAM.Hidden == false and SAM.Emitting then        
-        local disableArray = {SAM.Name, nil, nil} 
-        disableSAM(disableArray)      
-      elseif SAM.EnableTime and SAM.Emitting then      
-        SAM.EnableTime = SAM.EnableTime - 1 
-      end      
-      if SAM.DisableTime and SAM.DisableTime < 1 and SAM.Emitting == false then      
-        local enableArray = {SAM.Name, 120}
-        enableSAM(enableArray)     
-      elseif SAM.DisableTime and SAM.Emitting == false then      
-        SAM.DisableTime = SAM.DisableTime - 1         
-      end      
-    end
-   end
-  -- DETECT UNITS and ACTIVATE
-  for i, EWR in pairs(EWRSite) do
-    if EWR.EWRGroup:isExist() then
-      EWR.DetectedUnits = {}
-      if EWR.EWRGroup:getController() then
-        EWR.DetectedUnits = EWR.EWRGroup:getController():getDetectedTargets(Controller.Detection.RADAR)
-        for j, detectedTarget in pairs(EWR.DetectedUnits) do
-          if detectedTarget.object and (detectedTarget.object:getCategory() == 1) and detectedTarget.object:getGroup() and detectedTarget.object:getGroup():getUnit(1):getPoint() and detectedTarget.object:getGroup():getUnit(1) and detectedTarget.object:inAir() then
-            for k, SAM in pairs(EWR.SAMsControlled) do
-              local rangeToSAM = getDistance(detectedTarget.object:getPoint(),SAM.Location)
-              if rangeToSAM < SAM.EngageRange then 
-                local enableArray = {SAM.Name, 180}
-                enableSAM(enableArray)              
-              end
-            end 
-          end
-        end  
-      end 
-    end  
-  end     
-  ----env.info("IADS Monitor complete")
-  return timer.getTime() + 1
+local function onBirth(event)
+  local gp = event.initiator:getGroup()
+  local n = checkGroupRole(gp)
+  associateSAMS()
+  --TO DO: make a fcn for each EWR and SAM individually for here
+  
 end
 
-populateLists()
-timer.scheduleFunction(track_wpns, {}, timer.getTime() + 1)
---env.info("Populated SAM, AEW and EWR lists")
-disableAllSAMs()
-enableUncontrolledSAMs()
---env.info("Uncontrolled SAMs enabled")
---env.info("Weapon tracking begun")
-timer.scheduleFunction(IADSMonitor,{},timer.getTime()+1)
---env.info("IADS monitoring begun")
-world.addEventHandler(SEADHandler)
---env.info("SEAD event handler initiated")
+local function disableAllSAMs()
+  for _, SAM in pairs(SAMSites) do
+    SAM.SAMGroup:getController():setOption(AI.Option.Ground.id.ALARM_STATE,1)
+    SAM.Enabled = false
+  end
+  return nil
+end
+
+local function populateLists()
+  for _, gp in pairs(coalition.getGroups(1)) do
+    checkGroupRole(gp)
+  end
+  associateSAMS()
+  return nil
+end
+
+local function monitorTracks()
+
+  for _, EWR in pairs(EWRSites) do  
+    for _, track in pairs(EWR.trackFiles) do   
+      if ((timer.getAbsTime() - track.LastDetected) > trackMemory or (not track.Object:isExist()) or (not track.Object:inAir())) then      
+        EWR.trackFiles[track.Name] = nil 
+        TrackFiles.EWR[track.Name] = nil     
+      end   
+    end  
+  end 
+  for _, SAM in pairs(SAMSites) do  
+    for _, track in pairs(SAM.trackFiles) do    
+      if ((timer.getAbsTime() - track.LastDetected) > trackMemory or (not track.Object:isExist()) or (not track.Object:inAir())) then      
+        SAM.trackFiles[track.Name] = nil
+        TrackFiles.SAM[track.Name] = nil      
+      end   
+    end  
+  end
+  for _, AWACS in pairs(AWACSAircraft) do
+    for _, track in pairs(AWACS.trackFiles) do
+      if ((timer.getAbsTime() - track.LastDetected) > trackMemory or (not track.Object:isExist()) or (not track.Object:inAir())) then
+      AWACS.trackFiles[track.Name] = nil 
+        TrackFiles.AWACS[track.Name] = nil     
+      end   
+    end  
+  end       
+--  if tablelength(TrackFiles) ~= 0 then
+--   env.info(table.tostring(TrackFiles))    
+--  end
+  return timer.getTime() + 2
+end
+
+function protectedCall(...)
+  local status, retval = pcall(...)
+  if not status then
+--    env.info("Splash damage script error... gracefully caught! " .. retval)
+  end
+end
+
+function IADSHandler:onEvent(event)
+  if event.id == world.event.S_EVENT_DEAD then  
+    protectedCall(onDeath, event)  
+  elseif event.id == world.event.S_EVENT_SHOT then  
+    protectedCall(onShot, event)  
+  elseif event.id == world.event.S_EVENT_BIRTH then
+--    env.info("Birth Event")  
+    protectedCall(onBirth, event)  
+  end
+end
+
+if(IADSEnable) then
+  env.info("ENABLING IADS SCRIPT")
+  
+  world.addEventHandler(IADSHandler)
+    
+  timer.scheduleFunction(function()
+      protectedCall(populateLists)
+      return
+    end,
+    {},
+    timer.getTime()+5
+  )
+  
+  timer.scheduleFunction(function()
+      protectedCall(EWRTrackFileBuild)
+      return timer.getTime()+2
+    end,
+    {},
+    timer.getTime()+10
+  )
+  
+  timer.scheduleFunction(function()
+      protectedCall(SAMTrackFileBuild)
+      return timer.getTime()+2
+    end,
+     {},
+     timer.getTime()+11
+   )
+   timer.scheduleFunction(function()
+      protectedCall(AWACSTrackFileBuild)
+      return timer.getTime()+2
+    end,
+     {},
+     timer.getTime()+12
+   )
+     timer.scheduleFunction(function()
+      protectedCall(monitorTracks)
+      return timer.getTime()+2
+    end,
+     {},
+     timer.getTime()+13
+   )
+     timer.scheduleFunction(function()
+      protectedCall(SAMCheckHidden)
+      return timer.getTime()+2
+    end,
+     {},
+     timer.getTime()+14
+   )
+     timer.scheduleFunction(function()
+      protectedCall(BlinkSAM)
+      return timer.getTime()+2
+    end,
+     {},
+     timer.getTime()+15
+   )
+     timer.scheduleFunction(function()
+      protectedCall(EWRSAMOnRequest)
+      return timer.getTime()+2
+    end,
+     {},
+     timer.getTime()+16
+   )
+     timer.scheduleFunction(function()
+      protectedCall(disableAllSAMs)
+      return 
+    end,
+     {},
+     timer.getTime()+17
+   )
+end
