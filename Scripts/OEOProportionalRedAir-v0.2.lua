@@ -471,6 +471,7 @@ local function checkBlueAir()
 		
 			if	playerTable[i]:getTypeName() == "A-10A" 	or
 				playerTable[i]:getTypeName() == "A-10C" 	or
+				playerTable[i]:getTypeName() == "A-10C-2"	or
 				playerTable[i]:getTypeName() == "AV-8B" 	or
 				playerTable[i]:getTypeName() == "AJS37" 	or
 				playerTable[i]:getTypeName() == "SU-25T" 	or
