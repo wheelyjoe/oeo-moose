@@ -2,9 +2,17 @@
 
 -- Define Required Variables --
 
-local redVariationValue = math.random(1, 4)
+local redVariationValue = 1 --math.random(1, 4)
 
 local initPictureComplete = false
+
+local function runwayActive(name)
+	if trigger.misc.getUserFlag(name) == nil or trigger.misc.getUserFlag(name) == 0 then
+		return true
+	else
+		return false
+	end
+end
 
 -- Define Flights Using MOOSE --
 
@@ -81,6 +89,7 @@ end
 local function VarAJask21()
 		VarAJask21 = SPAWN:New("VarAJask21")
 		:InitLimit(2, 30)
+		:InitDelayOn()
 		:SpawnScheduled(1800, 0.25)
 		:InitRepeatOnLanding()
 end
@@ -88,6 +97,7 @@ end
 local function VarBJask21()
 		VarBJask21 = SPAWN:New("VarBJask21")
 		:InitLimit(2, 30)
+		:InitDelayOn()
 		:SpawnScheduled(1800, 0.25)
 		:InitRepeatOnLanding()
 end
@@ -95,6 +105,7 @@ end
 local function VarAJask22()
 		VarAJask22 = SPAWN:New("VarAJask22")
 		:InitLimit(2, 30)
+		:InitDelayOn()
 		:SpawnScheduled(1800, 0.25)
 		:InitRepeatOnLanding()
 end
@@ -102,6 +113,7 @@ end
 local function VarBJask22()
 		VarBJask22 = SPAWN:New("VarBJask22")
 		:InitLimit(2, 30)
+		:InitDelayOn()
 		:SpawnScheduled(1800, 0.25)
 		:InitRepeatOnLanding()
 end
@@ -109,6 +121,7 @@ end
 local function VarAJaskF5()
 		VarAJaskF5 = SPAWN:New("VarAJaskF5")
 		:InitLimit(2, 30)
+		:InitDelayOn()
 		:SpawnScheduled(1800, 0.25)
 		:InitRepeatOnLanding()
 end
@@ -116,6 +129,7 @@ end
 local function VarBJaskF5()
 		VarBJaskF5 = SPAWN:New("VarBJaskF5")
 		:InitLimit(2, 30)
+		:InitDelayOn()
 		:SpawnScheduled(1800, 0.25)
 		:InitRepeatOnLanding()
 end
@@ -255,61 +269,111 @@ local function InlandFulcrumsD()
 		:InitRepeatOnLanding()
 end
 
---Define Variations of Above Flights--
 
-local function VariationA(threat) -- OLD -- EXAMPLE ONLY --
+-- Individual Airbase Controllers --
+
+local function JaskControl(thrt)
 
 	if initPictureComplete == false then
+
+		if 	redVariationValue == 1 then
+			VarAJask22()
+			VarBJask22()
+		elseif redVariationValue == 2 then
+			VarAJask21()
+			VarBJask21()
+		else
+			VarAJaskF5()
+			VarBJaskF5()
+		end
 		
-		InlandFulcrumsA()
-		InlandFulcrumsB()
-		InlandFulcrumsC()
-		InlandFulcrumsD()
-		TomcatsA()
-		TomcatsB()
-		TomcatsC()
-		TomcatsD()
-		
-		VarAIsl21()
-		VarBIsl21()
-		
-		VarAJask22()
-		VarBJask22()
-		
-		VarAQWF4()
-		VarAQEF4()
-		
-		ScrambleIslands21()
-		ScrambleKhasabF4()
-		
-		env.info("PROP-AIR: Variation A default state initiated.")
 		initPictureComplete = true
 	end
-
-	if threat == 3 then
-		ScrambleKhasabF4:SpawnScheduleStart()
-		ScrambleIslands21:SpawnScheduleStart()
-	
-	elseif threat == 2 then
-		ScrambleKhasabF4:SpawnScheduleStop()
-		ScrambleIslands21:SpawnScheduleStart()	
 		
-	elseif threat == 1 then
-		ScrambleKhasabF4:SpawnScheduleStop()
-		ScrambleIslands21:SpawnScheduleStop()
-
-	else	
-		ScrambleKhasabF4:SpawnScheduleStop()
-		ScrambleIslands21:SpawnScheduleStop()
-	end	
+	if runwayActive("Jask") == false then
+	
+		env.info("Jask's runway is fucked! Stopping flights for 1 hr...")
+		
+		if 	redVariationValue == 1 then
+			VarAJask22:spawnScheduleStop()
+			VarBJask22:spawnScheduleStop()
+		elseif redVariationValue == 2 then
+			VarAJask21:spawnScheduleStop()
+			VarBJask21:spawnScheduleStop()
+		else
+			VarAJaskF5:spawnScheduleStop()
+			VarBJaskF5:spawnScheduleStop()
+		end
+	else
+	
+		env.info("Jask's runway is fine! Resuming flight operations.")
+		
+		if 	redVariationValue == 1 then
+			VarAJask22:spawnScheduleStart()
+			VarBJask22:spawnScheduleStart()
+		elseif redVariationValue == 2 then
+			VarAJask21:spawnScheduleStart()
+			VarBJask21:spawnScheduleStart()
+		else
+			VarAJaskF5:spawnScheduleStart()
+			VarBJaskF5:spawnScheduleStart()
+		end
+	end
 end
 
--- Jask Airfield Control --
+--[[local function AbbasControl(thrt)
 
-local function JaskControl(var, rwy)
+	if initPictureComplete == false then
+
+		if 	redVariationValue == 1 then
+			VarAQWF4()
+			VarAQEF4()
+		elseif redVariationValue == 2 then
+			VarBQWF4()
+			VarBQEF4()
+		elseif redVariationValue == 3 then
+			VarAQW23()
+			VarAQE23()
+		else
+			VarBQW23()
+			VarBQE23()
+		end
+			initPictureComplete = true
+		end
+		
+	if runwayActive("BandarAbbas_03L") == false and runwayActive("BandarAbbas_03R") == false then -- disables or re-enablers all spawns based on Runways being fucked or not
+		if 	redVariationValue == 1 then
+			VarAQWF4:spawnScheduleStop()
+			VarAQEF4:spawnScheduleStop()
+		elseif redVariationValue == 2 then
+			VarBQWF4:spawnScheduleStop()
+			VarBQEF4:spawnScheduleStop()
+		elseif redVariationValue == 3 then
+			VarAQW23:spawnScheduleStop()
+			VarAQE23:spawnScheduleStop()
+		else
+			VarBQW23:spawnScheduleStop()
+			VarBQE23:spawnScheduleStop()
+		end
+	else
+		if 	redVariationValue == 1 then
+			VarAQWF4:spawnScheduleStart()
+			VarAQEF4:spawnScheduleStart()
+		elseif redVariationValue == 2 then
+			VarBQWF4:spawnScheduleStart()
+			VarBQEF4:spawnScheduleStart()
+		elseif redVariationValue == 3 then
+			VarAQW23:spawnScheduleStart()
+			VarAQE23:spawnScheduleStart()
+		else
+			VarBQW23:spawnScheduleStart()
+			VarBQE23:spawnScheduleStart()
+		end
+	end
+end]]--
 
 
-end
+-- Analysis Functions --
 
 local function airThreatCalc() 	-- Calculates Threat Level posed by Blue Fighters on Server --
 
@@ -372,22 +436,22 @@ local function airThreatCalc() 	-- Calculates Threat Level posed by Blue Fighter
 	
 end
 
-local function runwayCheck() 	-- Creates and returns Table of Runway Statuses Mapwide --
 
 
-end
-
-local function checkBlueAir() 	-- Check Blue Air Player Assets and Schedule a Response Accordingly --
+local function pictureUpdate() 	-- Check Blue Air Player Assets and Schedule a Response Accordingly --
 
 	env.info("PROP-AIR: Check Blue Air Function started!")
+	if initPictureComplete == false then
+		env.info("No state detected, initiating...")
+	end
 
 	local airThreat = airThreatCalc()
 	
-	local runwayStatus = runwayCheck()
-	
+	JaskControl(airThreat)
+	AbbasControl(airThreat)	
 		
 	env.info("PROP-AIR: Check Blue Air Function finished!")
-	return timer.getTime() + 300
+	return timer.getTime() + 10
 end
 
 -- Initiate checkBlueAir Schedule --
@@ -395,7 +459,7 @@ end
 local function redAirInit()
 
 	env.info("PROP-AIR: Initiated!")
-	timer.scheduleFunction(checkBlueAir, nil, timer.getTime() + 1)
+	timer.scheduleFunction(pictureUpdate, nil, timer.getTime() + 1)
 
 end
 
