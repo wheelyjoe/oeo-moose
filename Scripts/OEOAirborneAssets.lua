@@ -11,6 +11,14 @@ local function logisticAssets()
 	  
 	 end
 	 
+	local function ARCSLO()
+		ARCSLOSpawner = SPAWN:New("ARC-SLO")
+		:InitLimit(1, 0)
+		:SpawnScheduled(10, 0)
+		:InitRepeatOnLanding()
+	
+	end
+	 
 	local function SHELL()
 	  SHELLSpawner = SPAWN:New("SHELL")
 	  :InitLimit(1, 0)
@@ -52,6 +60,7 @@ local function logisticAssets()
 	end
 	 
 	ARCO()
+	ARCSLO()
 	SHELL()
 	TEXACO()
 	MAGIC()

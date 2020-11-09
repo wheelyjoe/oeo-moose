@@ -263,7 +263,7 @@ function NewCSARMission:onEvent(event)
 			local DownedPilotPos = DownedPilotUnit:getPoint()
 			local DownedPilotController = Group.getController(DownedPilot)
 			DownedPilotController:setCommand(setFrequency)
-			trigger.action.outTextForCoalition(2, EjectedPlayer:getPlayerName().." has been hit and is going down! Initial reports suggest a good chute, and a CSAR mission is being readied to rescue him. Use the F10 menu for more information.", 20, 1)
+			trigger.action.outTextForCoalition(2, EjectedPlayer:getPlayerName().." has been hit and is going down! Initial reports suggest a good chute, and a CSAR mission is being readied to rescue them. Use the F10 menu for more information.", 20, 1)
 			local foundObjects = {}
 			timer.scheduleFunction(CSARAreaSearch, {DownedPilotUnit, foundObjects, DownedPilot, FreqForMessage}, timer.getTime()+ 10)
 		end
@@ -296,7 +296,7 @@ function CSARAreaSearch(ParamTable)
 				if PlayerCSARCount < 1
 					then
 						trigger.action.setUserFlag(foundObjectsName.."CSARCount", 1)
-						trigger.action.outTextForGroup(foundObjectsName, "You have successfully picked up the pilot! Get him back to the nearest NATO airbase or FARP to complete the CSAR mission!", 20, 1)
+						trigger.action.outTextForGroup(foundObjectsName, "You have successfully picked up the pilot! Get them back to the nearest NATO airbase or FARP to complete the CSAR mission!", 20, 1)
 						trigger.action.deactivateGroup(PilotGroup)
 						trigger.action.outTextForGroup(foundObjectsName, "Pilots on board: 1/4", 20, 1)
 						for i = 1, #ActiveCSARFrequencies
@@ -313,7 +313,7 @@ function CSARAreaSearch(ParamTable)
 				elseif PlayerCSARCount == 1
 					then
 						trigger.action.setUserFlag(foundObjectsName.."CSARCount", 2)
-						trigger.action.outTextForGroup(foundObjectsName, "You have successfully picked up the pilot! Get him back to the nearest NATO airbase or FARP to complete the CSAR mission!", 20, 1)
+						trigger.action.outTextForGroup(foundObjectsName, "You have successfully picked up the pilot! Get them back to the nearest NATO airbase or FARP to complete the CSAR mission!", 20, 1)
 						trigger.action.deactivateGroup(PilotGroup)
 						trigger.action.outTextForGroup(foundObjectsName, "Pilots on board: 2/4", 20, 1)
 						for i = 1, #ActiveCSARFrequencies
@@ -330,7 +330,7 @@ function CSARAreaSearch(ParamTable)
 				elseif PlayerCSARCount == 2
 					then
 						trigger.action.setUserFlag(foundObjectsName.."CSARCount", 3)
-						trigger.action.outTextForGroup(foundObjectsName, "You have successfully picked up the pilot! Get him back to the nearest NATO airbase or FARP to complete the CSAR mission!", 20, 1)
+						trigger.action.outTextForGroup(foundObjectsName, "You have successfully picked up the pilot! Get them back to the nearest NATO airbase or FARP to complete the CSAR mission!", 20, 1)
 						trigger.action.deactivateGroup(PilotGroup)
 						trigger.action.outTextForGroup(foundObjectsName, "Pilots on board: 3/4", 20, 1)
 						for i = 1, #ActiveCSARFrequencies
