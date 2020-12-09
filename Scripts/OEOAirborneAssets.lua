@@ -4,39 +4,41 @@ local function logisticAssets()
 
 
 	local function ARCO()
-	  ARCOSpawner = SPAWN:New("ARCO")
+	  ARCOSpawner = SPAWN:NewWithAlias("ARCO", "ARCO #IFF:5111FR")
 	  :InitLimit(1, 0)
 	  :SpawnScheduled(10, 0)
 	  :InitRepeatOnLanding()
+	  :SetCAllsign(1,1)
 	  
 	 end
 	 
 	local function ARCSLO()
-		ARCSLOSpawner = SPAWN:New("ARC-SLO")
+		ARCSLOSpawner = SPAWN:NewWithAlias("ARC-SLO", "ARCO #IFF:5121FR")
 		:InitLimit(1, 0)
 		:SpawnScheduled(10, 0)
 		:InitRepeatOnLanding()
+		:SetCAllsign(2,1)
 	
 	end
 	 
 	local function SHELL()
-	  SHELLSpawner = SPAWN:New("SHELL")
+	  SHELLSpawner = SPAWN:NewWithAlias("SHELL", "SHELL #IFF:5011FR")
 	  :InitLimit(1, 0)
 	  :SpawnScheduled(10, 0)
 	  :InitRepeatOnLanding()
-	  
+	  :SetCAllsign(1,1)
 	 end
 	 
 	local function TEXACO()
-	  TEXACOSpawner = SPAWN:New("TEXACO")
+	  TEXACOSpawner = SPAWN:NewWithAlias("TEXACO", "TEXACO #IFF:5211FR)
 	  :InitLimit(1, 0)
 	  :SpawnScheduled(10, 0)
 	  :InitRepeatOnLanding()
-	  
+	  :SetCAllsign(1,1)
 	 end
 
 	local function MAGIC()
-	  MAGICSpawner = SPAWN:New("MAGIC")
+	  MAGICSpawner = SPAWN:NewWithAlias("MAGIC", "MAGIC #IFF:3001FR)
 	  :InitLimit(1, 0)
 	  :SpawnScheduled(10, 0)
 	  :InitRepeatOnLanding()
@@ -44,7 +46,7 @@ local function logisticAssets()
 	 end
 	 
 	local function DARKSTAR()
-	  DARKSTARSpawner = SPAWN:New("DARKSTAR")
+	  DARKSTARSpawner = SPAWN:NewWithAlias("DARKSTAR", "DARKSTAR #IFF:3011FR)
 	  :InitLimit(1, 0)
 	  :SpawnScheduled(10, 0)
 	  :InitRepeatOnLanding()
